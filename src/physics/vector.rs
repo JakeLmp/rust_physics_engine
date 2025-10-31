@@ -4,17 +4,18 @@
 //! including addition, subtraction, scalar multiplication, and magnitude calculation.
 
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+use uom::si::f32::{Length, Ratio};
 
 /// A 2D vector with x and y components.
 #[derive(Debug, Clone, Copy)]
 pub struct Vector2D {
-    pub x: f32,
-    pub y: f32,
+    pub x: Length,
+    pub y: Length,
 }
 
 impl Vector2D {
     /// Returns the magnitude (length) of the vector.
-    pub fn mag(&self) -> f32 {
+    pub fn mag(&self) -> Length {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 }
@@ -64,10 +65,10 @@ impl SubAssign for Vector2D {
 }
 
 /// Implements scalar multiplication for `Vector2D`.
-impl Mul<f32> for Vector2D {
+impl Mul<Ratio> for Vector2D {
     type Output = Vector2D;
 
-    fn mul(self, scalar: f32) -> Vector2D {
+    fn mul(self, scalar: Ratio) -> Vector2D {
         Vector2D {
             x: self.x * scalar,
             y: self.y * scalar,
@@ -76,8 +77,8 @@ impl Mul<f32> for Vector2D {
 }
 
 /// Implements in-place scalar multiplication for `Vector2D`.
-impl MulAssign<f32> for Vector2D {
-    fn mul_assign(&mut self, scalar: f32) {
+impl MulAssign<Ratio> for Vector2D {
+    fn mul_assign(&mut self, scalar: Ratio) {
         *self = Self {
             x: self.x * scalar,
             y: self.y * scalar,
