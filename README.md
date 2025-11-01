@@ -15,8 +15,8 @@ Work in progress - building out core physics simulation and visualization.
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd <repo-name>
+git clone git@github.com:JakeLmp/rust_physics_engine.git
+cd rust_physics_engine
 
 # Set up pre-commit hooks
 python3 -m venv .venv
