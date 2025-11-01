@@ -43,7 +43,7 @@ async fn main() {
 
         for p in points.iter_mut() {
             p.draw_circle(mass_multiplier, color);
-            p.step(Some(StepType::Verlet));
+            p.step(Some(StepType::VelocityVerlet));
         }
 
         next_frame().await;
