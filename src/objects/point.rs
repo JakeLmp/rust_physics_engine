@@ -10,7 +10,7 @@ use crate::physics::vector::Vector2D;
 
 pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<millisecond>(100.));
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Point {
     pub pos: Vector2D<Length>,
     pub vel: Vector2D<Velocity>,
@@ -71,7 +71,7 @@ impl Point {
                 self.naive_step();
             }
             StepType::Verlet => {
-                todo!();
+                self.verlet_step();
             }
         }
     }
