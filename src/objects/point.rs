@@ -1,14 +1,15 @@
 use macroquad::prelude::draw_circle;
 use once_cell::sync::Lazy;
 use uom::si::{
+    acceleration,
     f32::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
-    time::millisecond,
+    time::{femtosecond, millisecond},
 };
 
-use crate::physics::vector::Vector2D;
+use crate::physics::{potential::Potential, vector::Vector2D};
 
-pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<millisecond>(100.));
+pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<femtosecond>(10.));
 
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -64,6 +65,17 @@ pub enum StepType {
 /// Update implementations
 #[allow(dead_code)]
 impl Point {
+    /// Apply potential
+    pub fn apply_potential(&mut self, potential: &Box<dyn Potential>, others: &[&Point]) {
+        // Reset acceleration
+        self.acc = Vector2D::<Acceleration>::zero();
+
+        // Apply forces
+        for other in others {
+            self.acc += potential.force(&self, other) / self.mass;
+        }
+    }
+
     /// Update position parameters using different methods
     pub fn step(&mut self, step_type: Option<StepType>) {
         let step_type = step_type.unwrap_or(StepType::Naive);
@@ -125,11 +137,16 @@ impl Point {
 
 /// Drawing implementations
 impl Point {
-    pub fn draw_circle(&self, mass_multiplier: f32, color: macroquad::prelude::Color) {
+    pub fn draw_circle(
+        &self,
+        scale_multiplier: Option<f32>,
+        mass_multiplier: Option<f32>,
+        color: macroquad::prelude::Color,
+    ) {
         draw_circle(
-            self.pos.x.value,
-            self.pos.y.value,
-            self.mass.value * mass_multiplier,
+            self.pos.x.value * scale_multiplier.unwrap_or(1.),
+            self.pos.y.value * scale_multiplier.unwrap_or(1.),
+            self.mass.value * mass_multiplier.unwrap_or(1.),
             color,
         );
     }
