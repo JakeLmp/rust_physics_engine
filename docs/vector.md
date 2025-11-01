@@ -1,6 +1,11 @@
-```
+```rust
+use uom::si::f32::{Length, Ratio};
+use uom::si::length::meter;
+use uom::si::ratio::ratio;
+use crate::physics::vector::Vector2D;
+
 // Create some vectors
-let mut v1 = Vector2D {
+let v1 = Vector2D {
     x: Length::new::<meter>(3.0),
     y: Length::new::<meter>(4.0),
 };
@@ -38,6 +43,7 @@ println!(
     v3.x.get::<meter>(),
     v3.y.get::<meter>()
 );
+println!();
 
 // AddAssign
 println!("=== AddAssign ===");
@@ -63,6 +69,7 @@ println!(
     v5.x.get::<meter>(),
     v5.y.get::<meter>()
 );
+println!();
 
 // SubAssign
 println!("=== SubAssign ===");
@@ -80,7 +87,7 @@ println!(
 );
 println!();
 
-// Multiplication by scalar
+// Multiplication by scalar (both orderings)
 println!("=== Multiplication ===");
 let v7 = v1 * scalar;
 println!(
@@ -89,21 +96,23 @@ println!(
     v7.x.get::<meter>(),
     v7.y.get::<meter>()
 );
-
-// MulAssign
-println!("=== MulAssign ===");
+let v8 = scalar * v1;
 println!(
-    "Before v1 *= {}: x = {} m, y = {} m",
+    "{} * v1 = x = {} m, y = {} m",
     scalar.get::<ratio>(),
-    v1.x.get::<meter>(),
-    v1.y.get::<meter>()
+    v8.x.get::<meter>(),
+    v8.y.get::<meter>()
 );
-v1 *= scalar;
+println!();
+
+// Division
+println!("=== Division ===");
+let v9 = v1 / scalar;
 println!(
-    "After v1 *= {}: x = {} m, y = {} m",
+    "v1 / {} = x = {} m, y = {} m",
     scalar.get::<ratio>(),
-    v1.x.get::<meter>(),
-    v1.y.get::<meter>()
+    v9.x.get::<meter>(),
+    v9.y.get::<meter>()
 );
 println!();
 
