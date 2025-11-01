@@ -8,7 +8,7 @@ use uom::si::{
 
 use crate::physics::vector::Vector2D;
 
-pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<millisecond>(1.));
+pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<millisecond>(100.));
 
 #[derive(Debug)]
 pub struct Point {
@@ -16,7 +16,9 @@ pub struct Point {
     pub vel: Vector2D<Velocity>,
     pub acc: Vector2D<Acceleration>,
     pub mass: Mass,
+    #[allow(dead_code)]
     last_pos: Vector2D<Length>,
+    #[allow(dead_code)]
     last_vel: Vector2D<Velocity>,
 }
 
@@ -49,6 +51,7 @@ impl Point {
     }
 }
 
+#[allow(dead_code)]
 pub enum StepType {
     ///
     Naive,
@@ -57,6 +60,7 @@ pub enum StepType {
 }
 
 /// Update implementations
+#[allow(dead_code)]
 impl Point {
     /// Update position parameters using different methods
     pub fn step(&mut self, step_type: Option<StepType>) {
