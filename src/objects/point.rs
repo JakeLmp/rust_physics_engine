@@ -41,7 +41,7 @@ impl Point {
         }
     }
 
-    // approximation for initial R_(k-1)
+    // approximation for initial R_(-1) ~ R_0 - tau * (V_0 + (tau * G_0) / 2)
     fn init_last_pos(
         first_pos: Vector2D<Length>,
         first_vel: Vector2D<Velocity>,
@@ -57,6 +57,8 @@ pub enum StepType {
     Naive,
     ///
     Verlet,
+    ///
+    VelocityVerlet,
 }
 
 /// Update implementations
@@ -72,6 +74,9 @@ impl Point {
             }
             StepType::Verlet => {
                 self.verlet_step();
+            }
+            StepType::VelocityVerlet => {
+                self.velocity_verlet_step();
             }
         }
     }
@@ -96,6 +101,25 @@ impl Point {
         self.vel = (self.pos - prev_pos) / (Ratio::new::<ratio>(2.) * *TIME_STEP);
 
         self.last_pos = current_pos;
+    }
+
+    /// Velocity Verlet update method variant
+    fn velocity_verlet_step(&mut self) {
+        // save before updating
+        let current_pos = self.pos;
+        let current_vel = self.vel;
+
+        // update pos
+        self.pos = self.pos
+            + *TIME_STEP * self.vel
+            + (*TIME_STEP / Ratio::new::<ratio>(2.0)) * (*TIME_STEP * self.acc);
+
+        // update vel
+        self.vel = self.vel
+            + (*TIME_STEP / Ratio::new::<ratio>(2.0)) * (Ratio::new::<ratio>(2.0) * self.acc); // this last term should actually be (G_(k+1) - G_k)
+
+        self.last_pos = current_pos;
+        self.last_vel = current_vel;
     }
 }
 
