@@ -3,7 +3,7 @@
 //! This module provides a `Vector2D` struct with basic vector operations
 //! including addition, subtraction, scalar multiplication, and magnitude calculation.
 
-use std::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
 use uom::si::Quantity;
 /// A generic-typed 2D vector with x and y components.
 #[derive(Debug, Clone, Copy)]
@@ -93,6 +93,22 @@ where
     fn sub_assign(&mut self, other: Self) {
         self.x -= other.x;
         self.y -= other.y;
+    }
+}
+
+/// Implements unary negation operator for `Vector2D`
+/// This allows reversing the vector's direction
+impl<Q> Neg for Vector2D<Q>
+where
+    Q: Neg<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn neg(self) -> Vector2D<Q> {
+        Vector2D {
+            x: -self.x,
+            y: -self.y,
+        }
     }
 }
 

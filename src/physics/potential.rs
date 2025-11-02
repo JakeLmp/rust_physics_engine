@@ -1,61 +1,92 @@
 use uom::si::{
-    f32::{Energy, Force, Length, Ratio},
+    ISQ, Quantity, SI,
+    energy::electronvolt,
+    f32::{Energy, Force, Length, Mass, Ratio, Time},
+    length::{angstrom, meter},
+    mass::kilogram,
     ratio::ratio,
+    time::second,
 };
-use uom::typenum::{P6, P8, P12, P14};
+use uom::typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0};
 
 use crate::{objects::point::Point, physics::vector::Vector2D};
 
 pub trait Potential {
-    /// Potential energy of a position in a one-dimensional potential
-    fn energy(&self, position: Length) -> Energy;
+    /// Returns a new potential struct with default parameter values
+    fn default() -> Self
+    where
+        Self: Sized;
 
-    /// Potential energy of a position in a radially symmetric potential
-    fn energy_radial(&self, position: Vector2D<Length>) -> Energy;
+    /// Potential energy between two points
+    fn energy(&self, point1: &Point, point2: &Point) -> Energy;
 
     /// Force exerted on point1 by point2
     fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force>;
 }
 
-// pub struct Gravity {
-//     pub g: Acceleration,
-// }
+// Define the type for G: m³/(kg·s²)
+pub type GravitationalParameter = Quantity<
+    ISQ<P3, N1, N2, Z0, Z0, Z0, Z0>, // L³·M⁻¹·T⁻²
+    SI<f32>,
+    f32,
+>;
 
-// impl Potential for Gravity {
-//     fn energy(&self, position: Length) -> Energy {
-//         todo!();
-//     }
+/// Newtonian Gravity potential.
+/// Typical value for the Gravitational Constant is G = 6.67430×10⁻¹¹ m³·kg⁻¹·s⁻²
+pub struct Gravity {
+    pub G: GravitationalParameter,
+}
 
-//     fn energy_radial(&self, position: Vector2D<Length>) -> Energy {
-//         todo!();
-//     }
+impl Potential for Gravity {
+    fn default() -> Self {
+        Self {
+            G: 6.67430e-11 * Length::new::<meter>(1.0).powi(P3::new())
+                / (Mass::new::<kilogram>(1.0) * Time::new::<second>(1.0).powi(P2::new())),
+        }
+    }
 
-//     fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force> {
-//         todo!();
-//     }
-// }
+    /// Gravitational potential energy: U = -G·m₁·m₂/r
+    fn energy(&self, point1: &Point, point2: &Point) -> Energy {
+        let r = point2.pos - point1.pos;
+        -self.G * point1.mass * point2.mass / r.mag()
+    }
+
+    /// Gravitational force: F = -G·m₁·m₂·r̂/r²
+    fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force> {
+        let r: Vector2D<Length> = point2.pos - point1.pos;
+        let r_mag: Length = r.mag();
+
+        -(r / r_mag) * self.G * point1.mass * point2.mass / (r_mag * r_mag)
+    }
+}
 
 /// The Lennard-Jones potential, commonly used in molecular dynamics
 /// Typical value examples
-/// Xenon: ε = 1.77 kJ/mol, σ = 4.10 Å
-/// Argon: ε = 0.997 kJ/mol (or ε/k_B = 119.8 K), σ = 3.40 Å
+/// Xenon: ε = 0.0184 eV, σ = 4.10 Å
+/// Argon: ε = 0.0104 eV (or ε/k_B = 119.8 K), σ = 3.40 Å
 pub struct LennardJones {
     pub epsilon: Energy,
     pub sigma: Length,
 }
 
 impl Potential for LennardJones {
-    fn energy(&self, position: Length) -> Energy {
+    /// Returns LennardJones with parameters for Argon gas
+    fn default() -> Self {
+        Self {
+            epsilon: Energy::new::<electronvolt>(0.0104),
+            sigma: Length::new::<angstrom>(3.4),
+        }
+    }
+
+    /// Lennard-Jones potential energy: U = 4ε[(σ/r)¹² - (σ/r)⁶]
+    fn energy(&self, point1: &Point, point2: &Point) -> Energy {
+        let r: Vector2D<Length> = point2.pos - point1.pos;
         Ratio::new::<ratio>(4.0)
             * self.epsilon
-            * ((self.sigma / position).powi(P12::new()) - (self.sigma / position).powi(P6::new()))
+            * ((self.sigma / r.mag()).powi(P12::new()) - (self.sigma / r.mag()).powi(P6::new()))
     }
 
-    fn energy_radial(&self, position: Vector2D<Length>) -> Energy {
-        let r: Length = position.mag();
-        self.energy(r)
-    }
-
+    /// Lennard-Jones force: F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
     fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force> {
         let r: Vector2D<Length> = point2.pos - point1.pos;
         let r_mag: Length = r.mag();
