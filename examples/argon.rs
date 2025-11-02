@@ -36,10 +36,10 @@ async fn main() {
     }
 
     // Lennard-Jones potential for Argon
-    let potential: Box<dyn Potential> = Box::new(LennardJones {
+    let potential = LennardJones {
         epsilon: Energy::new::<electronvolt>(0.0104),
         sigma: Length::new::<angstrom>(3.4),
-    });
+    };
 
     loop {
         clear_background(BLACK);
