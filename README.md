@@ -6,6 +6,9 @@ A hobby project building a basic 2D physics engine in Rust for learning and expe
 
 Work in progress - building out core physics simulation and visualization.
 
+- Uses [uom](https://docs.rs/uom/) for compile-time unit verification
+- Custom `Vector2D` type compatible with `uom` quantities
+
 ## Requirements
 
 - Rust (latest stable)
@@ -32,6 +35,7 @@ cargo run
 
 This project uses:
 - **macroquad** for 2D rendering
+- **uom** for type-safe physical units and quantities
 - **pre-commit** with `cargo fmt` and `clippy` (pedantic mode)
 
 Format and lint before committing:
