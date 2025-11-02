@@ -9,7 +9,7 @@ use uom::si::{
 
 use crate::physics::{potential::Potential, vector::Vector2D};
 
-pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<femtosecond>(10.));
+pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<femtosecond>(100.));
 
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -139,13 +139,14 @@ impl Point {
 impl Point {
     pub fn draw_circle(
         &self,
-        scale_multiplier: Option<f32>,
+        pos_multiplier: Option<f32>,
         mass_multiplier: Option<f32>,
         color: macroquad::prelude::Color,
     ) {
+        // println!("{:?}", self.pos.x.value * pos_multiplier.unwrap_or(1.));
         draw_circle(
-            self.pos.x.value * scale_multiplier.unwrap_or(1.),
-            self.pos.y.value * scale_multiplier.unwrap_or(1.),
+            self.pos.x.value * pos_multiplier.unwrap_or(1.),
+            self.pos.y.value * pos_multiplier.unwrap_or(1.),
             self.mass.value * mass_multiplier.unwrap_or(1.),
             color,
         );

@@ -3,10 +3,12 @@ mod physics;
 
 use uom::si::{
     acceleration::meter_per_second_squared,
-    energy::{joule, kilojoule},
-    f32::{Acceleration, Energy, Length, Mass, Velocity},
+    amount_of_substance::mole,
+    energy::{electronvolt, joule, kilojoule},
+    f32::{Acceleration, AmountOfSubstance, Energy, Length, Mass, MolarEnergy, Velocity},
     length::{angstrom, meter},
-    mass::kilogram,
+    mass::{dalton, kilogram},
+    molar_energy::kilojoule_per_mole,
     velocity::{atomic_unit_of_velocity, meter_per_second},
 };
 
@@ -17,36 +19,60 @@ use physics::vector::Vector2D;
 
 use crate::physics::potential::LennardJones;
 
+/// Calculate multiplier so pos.mag.value * scale ~ 1.
+fn get_position_scale_multiplier(points: &[Point]) -> f32 {
+    let max = points
+        .iter()
+        .map(|point| point.pos.mag().value)
+        .fold(0.0 as f32, f32::max);
+    // let mag = pos.mag().value;
+    if max > 0.0 {
+        1. / (10. as f32).powf(max.log10().floor())
+    } else {
+        1.
+    }
+}
+
+/// Calculate multiplier so mass.value * scale ~ 1.
+fn get_mass_scale_multiplier(mass: &Mass) -> f32 {
+    if mass.value > 0. {
+        1. / (10. as f32).powf(mass.value.log10().floor())
+    } else {
+        1.
+    }
+}
+
 #[macroquad::main("Physics")]
 async fn main() {
+    // units for Argon gas
     let mut points: Vec<Point> = Vec::new();
-    for _i in 0..2 {
+    for _i in 0..10 {
         points.push(Point::new(
             Vector2D {
-                x: Length::new::<angstrom>(rand::gen_range(0.0, 100.0)),
-                y: Length::new::<angstrom>(rand::gen_range(0.0, 100.0)),
+                x: Length::new::<angstrom>(rand::gen_range(50.0, 100.0)),
+                y: Length::new::<angstrom>(rand::gen_range(50.0, 100.0)),
             },
             Vector2D {
                 x: Velocity::new::<atomic_unit_of_velocity>(0.0),
                 y: Velocity::new::<atomic_unit_of_velocity>(0.0),
             },
             Vector2D {
-                x: Acceleration::new::<meter_per_second_squared>(rand::gen_range(-1.0, 1.0)),
-                y: Acceleration::new::<meter_per_second_squared>(rand::gen_range(-1.0, 1.0)),
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
             },
-            Mass::new::<kilogram>(1.0),
+            // Mass::new::<dalton>(39.948),
+            Mass::new::<dalton>(5.),
         ));
     }
 
-    println!("{:?}", points[0]);
-
+    // potentials for Argon gas
     let potential: Box<dyn physics::potential::Potential> = Box::new(LennardJones {
-        epsilon: Energy::new::<kilojoule>(1000.0),
-        sigma: Length::new::<meter>(1.0),
+        epsilon: Energy::new::<electronvolt>(0.0104),
+        sigma: Length::new::<angstrom>(3.4),
     });
 
-    let scale_multiplier: f32 = 10e10;
-    let mass_multiplier: f32 = 10e10;
+    let pos_multiplier: f32 = 200. * get_position_scale_multiplier(&points);
+    let mass_multiplier: f32 = 2. * get_mass_scale_multiplier(&points[0].mass);
     let color = WHITE;
 
     loop {
@@ -57,10 +83,12 @@ async fn main() {
             let (current, right) = right.split_first_mut().unwrap();
             let others: Vec<&Point> = left.iter().chain(right.iter()).collect();
 
-            current.draw_circle(Some(scale_multiplier), Some(mass_multiplier), color);
+            current.draw_circle(Some(pos_multiplier), Some(mass_multiplier), color);
             current.apply_potential(&potential, &others);
             current.step(Some(StepType::Verlet));
         }
+
+        // println!("{:?}", points[0].pos);
 
         next_frame().await;
     }
