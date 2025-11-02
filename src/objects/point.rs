@@ -1,15 +1,14 @@
 use macroquad::prelude::draw_circle;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use uom::si::{
-    acceleration,
     f32::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
-    time::{femtosecond, millisecond},
+    time::femtosecond,
 };
 
 use crate::physics::{potential::Potential, vector::Vector2D};
 
-pub static TIME_STEP: Lazy<Time> = Lazy::new(|| Time::new::<femtosecond>(100.));
+pub static TIME_STEP: LazyLock<Time> = LazyLock::new(|| Time::new::<femtosecond>(100.));
 
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -54,11 +53,11 @@ impl Point {
 
 #[allow(dead_code)]
 pub enum StepType {
-    ///
+    /// Naive update method (Rₖ₊₁ = Rₖ + τ × Vₖ) and equiv. for velocity
     Naive,
-    ///
+    /// Base Verlet update method
     Verlet,
-    ///
+    /// Velocity version of Verlet update method
     VelocityVerlet,
 }
 
@@ -66,13 +65,13 @@ pub enum StepType {
 #[allow(dead_code)]
 impl Point {
     /// Apply potential
-    pub fn apply_potential(&mut self, potential: &Box<dyn Potential>, others: &[&Point]) {
+    pub fn apply_potential(&mut self, potential: &dyn Potential, others: &[&Point]) {
         // Reset acceleration
         self.acc = Vector2D::<Acceleration>::zero();
 
         // Apply forces
         for other in others {
-            self.acc += potential.force(&self, other) / self.mass;
+            self.acc += potential.force(self, other) / self.mass;
         }
     }
 
@@ -122,13 +121,11 @@ impl Point {
         let current_vel = self.vel;
 
         // update pos
-        self.pos = self.pos
-            + *TIME_STEP * self.vel
+        self.pos += *TIME_STEP * self.vel
             + (*TIME_STEP / Ratio::new::<ratio>(2.0)) * (*TIME_STEP * self.acc);
 
         // update vel
-        self.vel = self.vel
-            + (*TIME_STEP / Ratio::new::<ratio>(2.0)) * (Ratio::new::<ratio>(2.0) * self.acc); // this last term should actually be (G_(k+1) - G_k)
+        self.vel += (*TIME_STEP / Ratio::new::<ratio>(2.0)) * (Ratio::new::<ratio>(2.0) * self.acc); // this last term should actually be (G_(k+1) - G_k)
 
         self.last_pos = current_pos;
         self.last_vel = current_vel;

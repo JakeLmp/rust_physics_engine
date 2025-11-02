@@ -32,7 +32,7 @@ where
     Quantity<D, U, f32>: Copy,
 {
     /// Returns the magnitude of the vector.
-    pub fn mag(&self) -> Quantity<D, U, f32> {
+    pub fn mag(self) -> Quantity<D, U, f32> {
         let x_val = self.x.value;
         let y_val = self.y.value;
         let magnitude = (x_val * x_val + y_val * y_val).sqrt();
