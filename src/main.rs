@@ -13,10 +13,7 @@ use uom::si::{
 use macroquad::prelude::*;
 
 use objects::point::{Point, StepType};
-use physics::{
-    potential::{LennardJones, Potential},
-    vector::Vector2D,
-};
+use physics::{potential::LennardJones, vector::Vector2D};
 
 /// Calculate multiplier so pos.mag.value * scale ~ 1.
 fn get_position_scale_multiplier(points: &[Point]) -> f32 {
