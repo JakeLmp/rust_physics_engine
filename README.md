@@ -48,3 +48,11 @@ See the [`docs/point.md`](docs/point.md) and [`docs/vector.md`](docs/vector.md) 
 - **Vector2D**: Performing vector math for physics calculations.
 
 These documentation pages include code snippets and explanations to help you get started with simulation and visualization.
+
+You can also find runnable simulation examples in the `examples/` folder.
+
+To run an example, use:
+```bash
+cargo run --example <example_name>
+```
+Replace `<example_name>` with the name of the example file (without the `.rs` extension).
