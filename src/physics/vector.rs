@@ -3,8 +3,8 @@
 //! This module provides a `Vector2D` struct with basic vector operations
 //! including addition, subtraction, scalar multiplication, and magnitude calculation.
 
-use std::ops::{Add, AddAssign, Div, Mul, Sub, SubAssign};
-
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
+use uom::si::Quantity;
 /// A generic-typed 2D vector with x and y components.
 #[derive(Debug, Clone, Copy)]
 pub struct Vector2D<Q> {
@@ -25,13 +25,22 @@ where
     }
 }
 
-impl<Q> Vector2D<Q>
+impl<D, U> Vector2D<Quantity<D, U, f32>>
 where
-    Q: Copy + Mul<Q, Output = Q> + Add<Output = Q> + uom::num_traits::Float,
+    D: uom::si::Dimension + ?Sized,
+    U: uom::si::Units<f32> + ?Sized,
+    Quantity<D, U, f32>: Copy,
 {
     /// Returns the magnitude of the vector.
-    pub fn mag(&self) -> Q {
-        (self.x * self.x + self.y * self.y).sqrt()
+    pub fn mag(self) -> Quantity<D, U, f32> {
+        let x_val = self.x.value;
+        let y_val = self.y.value;
+        let magnitude = (x_val * x_val + y_val * y_val).sqrt();
+        Quantity {
+            dimension: std::marker::PhantomData,
+            units: std::marker::PhantomData,
+            value: magnitude,
+        }
     }
 }
 
@@ -84,6 +93,22 @@ where
     fn sub_assign(&mut self, other: Self) {
         self.x -= other.x;
         self.y -= other.y;
+    }
+}
+
+/// Implements unary negation operator for `Vector2D`
+/// This allows reversing the vector's direction
+impl<Q> Neg for Vector2D<Q>
+where
+    Q: Neg<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn neg(self) -> Vector2D<Q> {
+        Vector2D {
+            x: -self.x,
+            y: -self.y,
+        }
     }
 }
 
