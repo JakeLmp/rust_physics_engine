@@ -3,12 +3,12 @@ use std::sync::LazyLock;
 use uom::si::{
     f32::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
-    time::femtosecond,
+    time::day,
 };
 
 use crate::physics::{potential::Potential, vector::Vector2D};
 
-pub static TIME_STEP: LazyLock<Time> = LazyLock::new(|| Time::new::<femtosecond>(100.));
+pub static TIME_STEP: LazyLock<Time> = LazyLock::new(|| Time::new::<day>(1.));
 
 #[derive(Debug, Clone)]
 pub struct Point {

@@ -1,5 +1,5 @@
 use physics_engine::objects::point::{Point, StepType};
-use physics_engine::physics::potential::{LennardJones, Potential};
+use physics_engine::physics::potential::LennardJones;
 use physics_engine::physics::vector::Vector2D;
 
 use uom::si::{
