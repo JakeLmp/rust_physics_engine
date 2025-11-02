@@ -3,40 +3,39 @@ mod physics;
 
 use uom::si::{
     acceleration::meter_per_second_squared,
-    amount_of_substance::mole,
-    energy::{electronvolt, joule, kilojoule},
-    f32::{Acceleration, AmountOfSubstance, Energy, Length, Mass, MolarEnergy, Velocity},
-    length::{angstrom, meter},
-    mass::{dalton, kilogram},
-    molar_energy::kilojoule_per_mole,
-    velocity::{atomic_unit_of_velocity, meter_per_second},
+    energy::electronvolt,
+    f32::{Acceleration, Energy, Length, Mass, Velocity},
+    length::angstrom,
+    mass::dalton,
+    velocity::atomic_unit_of_velocity,
 };
 
 use macroquad::prelude::*;
 
 use objects::point::{Point, StepType};
-use physics::vector::Vector2D;
-
-use crate::physics::potential::LennardJones;
+use physics::{
+    potential::{LennardJones, Potential},
+    vector::Vector2D,
+};
 
 /// Calculate multiplier so pos.mag.value * scale ~ 1.
 fn get_position_scale_multiplier(points: &[Point]) -> f32 {
     let max = points
         .iter()
         .map(|point| point.pos.mag().value)
-        .fold(0.0 as f32, f32::max);
+        .fold(0.0_f32, f32::max);
     // let mag = pos.mag().value;
     if max > 0.0 {
-        1. / (10. as f32).powf(max.log10().floor())
+        1. / (10_f32).powf(max.log10().floor())
     } else {
         1.
     }
 }
 
 /// Calculate multiplier so mass.value * scale ~ 1.
-fn get_mass_scale_multiplier(mass: &Mass) -> f32 {
+fn get_mass_scale_multiplier(mass: Mass) -> f32 {
     if mass.value > 0. {
-        1. / (10. as f32).powf(mass.value.log10().floor())
+        1. / (10_f32).powf(mass.value.log10().floor())
     } else {
         1.
     }
@@ -66,13 +65,13 @@ async fn main() {
     }
 
     // potentials for Argon gas
-    let potential: Box<dyn physics::potential::Potential> = Box::new(LennardJones {
+    let potential = LennardJones {
         epsilon: Energy::new::<electronvolt>(0.0104),
         sigma: Length::new::<angstrom>(3.4),
-    });
+    };
 
     let pos_multiplier: f32 = 200. * get_position_scale_multiplier(&points);
-    let mass_multiplier: f32 = 2. * get_mass_scale_multiplier(&points[0].mass);
+    let mass_multiplier: f32 = 2. * get_mass_scale_multiplier(points[0].mass);
     let color = WHITE;
 
     loop {

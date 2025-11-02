@@ -11,6 +11,7 @@ use uom::typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0};
 
 use crate::{objects::point::Point, physics::vector::Vector2D};
 
+#[allow(dead_code)]
 pub trait Potential {
     /// Returns a new potential struct with default parameter values
     fn default() -> Self
@@ -34,13 +35,13 @@ pub type GravitationalParameter = Quantity<
 /// Newtonian Gravity potential.
 /// Typical value for the Gravitational Constant is G = 6.67430×10⁻¹¹ m³·kg⁻¹·s⁻²
 pub struct Gravity {
-    pub G: GravitationalParameter,
+    pub big_g: GravitationalParameter,
 }
 
 impl Potential for Gravity {
     fn default() -> Self {
         Self {
-            G: 6.67430e-11 * Length::new::<meter>(1.0).powi(P3::new())
+            big_g: 6.67430e-11 * Length::new::<meter>(1.0).powi(P3::new())
                 / (Mass::new::<kilogram>(1.0) * Time::new::<second>(1.0).powi(P2::new())),
         }
     }
@@ -48,7 +49,7 @@ impl Potential for Gravity {
     /// Gravitational potential energy: U = -G·m₁·m₂/r
     fn energy(&self, point1: &Point, point2: &Point) -> Energy {
         let r = point2.pos - point1.pos;
-        -self.G * point1.mass * point2.mass / r.mag()
+        -self.big_g * point1.mass * point2.mass / r.mag()
     }
 
     /// Gravitational force: F = -G·m₁·m₂·r̂/r²
@@ -56,7 +57,7 @@ impl Potential for Gravity {
         let r: Vector2D<Length> = point2.pos - point1.pos;
         let r_mag: Length = r.mag();
 
-        -(r / r_mag) * self.G * point1.mass * point2.mass / (r_mag * r_mag)
+        -(r / r_mag) * self.big_g * point1.mass * point2.mass / (r_mag * r_mag)
     }
 }
 
@@ -70,7 +71,7 @@ pub struct LennardJones {
 }
 
 impl Potential for LennardJones {
-    /// Returns LennardJones with parameters for Argon gas
+    /// Returns `LennardJones` with parameters for Argon gas
     fn default() -> Self {
         Self {
             epsilon: Energy::new::<electronvolt>(0.0104),
