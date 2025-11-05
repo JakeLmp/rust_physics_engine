@@ -1,10 +1,14 @@
+//! Unit definitions for config-level scaling.
+//!
+//! This module provides enums and helpers for working with physical units
+//! (length and mass) using `uom`. Intended for use in configuration and
+//! scaling of simulation parameters.
+
 use uom::si::{
     f32::{Length, Mass},
     length::{angstrom, nanometer, picometer},
     mass::{dalton, kilogram},
 };
-
-use crate::physics::vector::Vector2D;
 
 #[derive(Clone, Copy)]
 enum LengthUnit {
