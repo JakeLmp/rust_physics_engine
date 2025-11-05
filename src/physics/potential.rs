@@ -52,12 +52,13 @@ impl Potential for Gravity {
         -self.big_g * point1.mass * point2.mass / r.mag()
     }
 
-    /// Gravitational force: F = -G·m₁·m₂·r̂/r²
+    /// Gravitational force: F = G·m₁·m₂·r̂/r²
     fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force> {
-        let r: Vector2D<Length> = point2.pos - point1.pos;
+        let r: Vector2D<Length> = point1.pos - point2.pos;
         let r_mag: Length = r.mag();
+        let r_hat: Vector2D<Ratio> = r / r_mag;
 
-        -(r / r_mag) * self.big_g * point1.mass * point2.mass / (r_mag * r_mag)
+        -r_hat * self.big_g * point1.mass * point2.mass / (r_mag * r_mag)
     }
 }
 
@@ -89,7 +90,7 @@ impl Potential for LennardJones {
 
     /// Lennard-Jones force: F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
     fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force> {
-        let r: Vector2D<Length> = point2.pos - point1.pos;
+        let r: Vector2D<Length> = point1.pos - point2.pos;
         let r_mag: Length = r.mag();
 
         r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
