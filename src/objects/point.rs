@@ -1,13 +1,10 @@
-use std::sync::LazyLock;
+use std::fmt;
 use uom::si::{
     f32::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
-    time::day,
 };
 
 use crate::physics::{potential::Potential, vector::Vector2D};
-
-pub static TIME_STEP: LazyLock<Time> = LazyLock::new(|| Time::new::<day>(1.));
 
 #[derive(Debug, Clone)]
 pub struct Point {
@@ -29,13 +26,14 @@ impl Point {
         vel: Vector2D<Velocity>,
         acc: Vector2D<Acceleration>,
         mass: Mass,
+        time_step: Time,
     ) -> Self {
         Self {
             pos,
             vel,
             acc,
             mass,
-            last_pos: Self::init_last_pos(pos, vel, acc),
+            last_pos: Self::init_last_pos(pos, vel, acc, time_step),
             last_vel: Vector2D::<Velocity>::zero(),
         }
     }
@@ -45,8 +43,9 @@ impl Point {
         first_pos: Vector2D<Length>,
         first_vel: Vector2D<Velocity>,
         first_acc: Vector2D<Acceleration>,
+        time_step: Time,
     ) -> Vector2D<Length> {
-        first_pos - *TIME_STEP * (first_vel + (*TIME_STEP * first_acc) / 2.)
+        first_pos - time_step * (first_vel + (time_step * first_acc) / 2.)
     }
 }
 
@@ -75,58 +74,68 @@ impl Point {
     }
 
     /// Update position parameters using different methods
-    pub fn step(&mut self, step_type: Option<StepType>) {
+    pub fn step(&mut self, step_type: Option<StepType>, time_step: Time) {
         let step_type = step_type.unwrap_or(StepType::Naive);
 
         match step_type {
             StepType::Naive => {
-                self.naive_step();
+                self.naive_step(time_step);
             }
             StepType::Verlet => {
-                self.verlet_step();
+                self.verlet_step(time_step);
             }
             StepType::VelocityVerlet => {
-                self.velocity_verlet_step();
+                self.velocity_verlet_step(time_step);
             }
         }
     }
 
     /// Naive update method
-    fn naive_step(&mut self) {
-        self.pos += *TIME_STEP * self.vel;
-        self.vel += *TIME_STEP * self.acc;
+    fn naive_step(&mut self, time_step: Time) {
+        self.pos += time_step * self.vel;
+        self.vel += time_step * self.acc;
     }
 
     /// Verlet update method
-    fn verlet_step(&mut self) {
+    fn verlet_step(&mut self, time_step: Time) {
         // save before updating
         let prev_pos = self.last_pos;
         let current_pos = self.pos;
 
         // update pos
-        self.pos = Ratio::new::<ratio>(2.) * self.pos - self.last_pos
-            + *TIME_STEP * (*TIME_STEP * self.acc);
+        self.pos =
+            Ratio::new::<ratio>(2.) * self.pos - self.last_pos + time_step * (time_step * self.acc);
 
         // update vel
-        self.vel = (self.pos - prev_pos) / (Ratio::new::<ratio>(2.) * *TIME_STEP);
+        self.vel = (self.pos - prev_pos) / (Ratio::new::<ratio>(2.) * time_step);
 
         self.last_pos = current_pos;
     }
 
     /// Velocity Verlet update method variant
-    fn velocity_verlet_step(&mut self) {
+    fn velocity_verlet_step(&mut self, time_step: Time) {
         // save before updating
         let current_pos = self.pos;
         let current_vel = self.vel;
 
         // update pos
-        self.pos += *TIME_STEP * self.vel
-            + (*TIME_STEP / Ratio::new::<ratio>(2.0)) * (*TIME_STEP * self.acc);
+        self.pos +=
+            time_step * self.vel + (time_step / Ratio::new::<ratio>(2.0)) * (time_step * self.acc);
 
         // update vel
-        self.vel += (*TIME_STEP / Ratio::new::<ratio>(2.0)) * (Ratio::new::<ratio>(2.0) * self.acc); // this last term should actually be (G_(k+1) - G_k)
+        self.vel += (time_step / Ratio::new::<ratio>(2.0)) * (Ratio::new::<ratio>(2.0) * self.acc); // this last term should actually be (G_(k+1) - G_k)
 
         self.last_pos = current_pos;
         self.last_vel = current_vel;
+    }
+}
+
+impl fmt::Display for Point {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Point {{ pos: {:?}, vel: {:?}, acc: {:?}, mass: {:?} }}",
+            self.pos, self.vel, self.acc, self.mass
+        )
     }
 }
