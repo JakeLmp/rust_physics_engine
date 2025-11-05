@@ -6,7 +6,6 @@ use physics_engine::simulation::config::SimulationConfig;
 use physics_engine::simulation::screen::Screen;
 use physics_engine::simulation::units::{LengthUnit, MassUnit};
 use uom::si::f32::Time;
-use uom::si::mass::kilogram;
 use uom::si::{
     acceleration::meter_per_second_squared,
     energy::electronvolt,
