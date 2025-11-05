@@ -23,19 +23,20 @@ use macroquad::prelude::*;
 async fn main() {
     // Simulation config for Argon
     let config = SimulationConfig {
-        time_step: Time::new::<femtosecond>(1.0), // 1 fs per step
+        time_step: Time::new::<femtosecond>(100.0),
         length_unit: LengthUnit::Angstrom,
         mass_unit: MassUnit::Dalton,
         pixels_per_length: 4.0, // 4 pixels per angstrom
     };
 
     // Initialize argon atoms
+    let max_bound = 100.0;
     let mut points: Vec<Point> = Vec::new();
-    for _i in 0..10 {
+    for _i in 0..100 {
         points.push(Point::new(
             Vector2D {
-                x: Length::new::<angstrom>(rand::gen_range(50.0, 100.0)),
-                y: Length::new::<angstrom>(rand::gen_range(50.0, 100.0)),
+                x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
+                y: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
             },
             Vector2D {
                 x: Velocity::new::<atomic_unit_of_velocity>(0.0),
@@ -69,7 +70,7 @@ async fn main() {
             Screen::draw_point(
                 current,
                 &config,
-                Some(15.0 / current.mass.get::<kilogram>()),
+                Some(15.0 / current.mass.get::<dalton>()),
                 color,
             );
             current.apply_potential(&potential, &others);

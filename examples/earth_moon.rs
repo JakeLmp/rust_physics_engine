@@ -21,7 +21,7 @@ use macroquad::prelude::*;
 async fn main() {
     // Simulation config for Earth-Moon system
     let config = SimulationConfig {
-        time_step: Time::new::<second>(1000.0), // 1000 seconds per step
+        time_step: Time::new::<second>(1000.0),
         length_unit: LengthUnit::Meter,
         mass_unit: MassUnit::Kilogram,
         pixels_per_length: 400.0 / 3.844e8, // scale to fit on screen
