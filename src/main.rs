@@ -8,7 +8,7 @@ use uom::si::{
     f32::{Acceleration, Energy, Length, Mass, Time, Velocity},
     length::angstrom,
     mass::{dalton, kilogram},
-    time::{day, femtosecond},
+    time::{day, femtosecond, second},
     velocity::{atomic_unit_of_velocity, kilometer_per_second, meter_per_second},
 };
 
@@ -27,7 +27,7 @@ use simulation::units::*;
 async fn main() {
     // Simulation config for Earth-Moon system
     let config = SimulationConfig {
-        time_step: Time::new::<uom::si::time::second>(1000.0), // 1000 seconds per step
+        time_step: Time::new::<second>(1000.0), // 1000 seconds per step
         length_unit: LengthUnit::Meter,
         mass_unit: MassUnit::Kilogram,
         pixels_per_length: 400.0 / 3.844e8, // scale to fit on screen
