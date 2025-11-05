@@ -2,11 +2,16 @@ use physics_engine::objects::point::{Point, StepType};
 use physics_engine::physics::potential::{Gravity, Potential};
 use physics_engine::physics::vector::Vector2D;
 
+use physics_engine::simulation::config::SimulationConfig;
+use physics_engine::simulation::screen::Screen;
+use physics_engine::simulation::units::{LengthUnit, MassUnit};
+use uom::si::f32::Time;
 use uom::si::{
     acceleration::meter_per_second_squared,
     f32::{Acceleration, Length, Mass, Velocity},
     length::meter,
     mass::kilogram,
+    time::second,
     velocity::meter_per_second,
 };
 
@@ -14,6 +19,14 @@ use macroquad::prelude::*;
 
 #[macroquad::main("Earth-Moon System")]
 async fn main() {
+    // Simulation config for Earth-Moon system
+    let config = SimulationConfig {
+        time_step: Time::new::<second>(1000.0), // 1000 seconds per step
+        length_unit: LengthUnit::Meter,
+        mass_unit: MassUnit::Kilogram,
+        pixels_per_length: 400.0 / 3.844e8, // scale to fit on screen
+    };
+
     // Earth-Moon system parameters
     let earth_mass = Mass::new::<kilogram>(5.972e24); // Earth mass
     let moon_mass = Mass::new::<kilogram>(7.342e22); // Moon mass
@@ -38,6 +51,7 @@ async fn main() {
                 y: Acceleration::new::<meter_per_second_squared>(0.0),
             },
             earth_mass,
+            config.time_step,
         ),
         // Moon
         Point::new(
@@ -54,16 +68,12 @@ async fn main() {
                 y: Acceleration::new::<meter_per_second_squared>(0.0),
             },
             moon_mass,
+            config.time_step,
         ),
     ];
 
     // Newtonian gravity potential
     let potential = Gravity::default();
-
-    // Scale for visualization
-    let pos_multiplier = 400.0 / earth_moon_distance.value;
-    // Scale masses to get reasonable visual sizes (Earth ~15 pixels, Moon ~5 pixels)
-    let mass_multiplier = 15.0 / earth_mass.value;
 
     loop {
         clear_background(BLACK);
@@ -74,10 +84,15 @@ async fn main() {
             let others: Vec<&Point> = left.iter().chain(right.iter()).collect();
 
             let color = if i == 0 { BLUE } else { WHITE };
-            current.draw_circle(Some(pos_multiplier), Some(mass_multiplier), color);
+            Screen::draw_point(
+                current,
+                &config,
+                Some(15.0 / current.mass.get::<kilogram>()),
+                color,
+            );
 
             current.apply_potential(&potential, &others);
-            current.step(Some(StepType::Verlet));
+            current.step(Some(StepType::Verlet), config.time_step);
         }
 
         next_frame().await;
