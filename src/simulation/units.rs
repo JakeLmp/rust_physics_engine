@@ -18,13 +18,13 @@ use uom::si::{
         attogram, carat, centigram, dalton, decagram, decigram, exagram, femtogram, gigagram,
         grain, gram, hectogram, hundredweight_long, hundredweight_short, kilogram, megagram,
         microgram, milligram, nanogram, ounce, ounce_troy, pennyweight, petagram, picogram, pound,
-        pound_troy, slug, stone, teragram, ton, ton_assay, ton_long, ton_short, tonne, yoctogram,
-        yottagram, zeptogram, zettagram,
+        pound_troy, slug, teragram, ton, ton_assay, ton_long, ton_short, yoctogram, yottagram,
+        zeptogram, zettagram,
     },
 };
 
 #[derive(Clone, Copy)]
-enum LengthUnit {
+pub enum LengthUnit {
     Angstrom,
     AstronomicalUnit,
     AtomicUnitOfLength,
@@ -73,7 +73,7 @@ enum LengthUnit {
 }
 
 impl LengthUnit {
-    fn create(&self, value: f32) -> Length {
+    pub fn create(&self, value: f32) -> Length {
         match self {
             LengthUnit::Angstrom => Length::new::<angstrom>(value),
             LengthUnit::AstronomicalUnit => Length::new::<astronomical_unit>(value),
@@ -123,7 +123,7 @@ impl LengthUnit {
         }
     }
 
-    fn get(&self, length: Length) -> f32 {
+    pub fn get(&self, length: Length) -> f32 {
         match self {
             LengthUnit::Angstrom => length.get::<angstrom>(),
             LengthUnit::AstronomicalUnit => length.get::<astronomical_unit>(),
@@ -173,7 +173,7 @@ impl LengthUnit {
         }
     }
 
-    fn name(&self) -> &'static str {
+    pub fn name(&self) -> &'static str {
         match self {
             LengthUnit::Angstrom => "Å",
             LengthUnit::AstronomicalUnit => "au",
@@ -225,7 +225,7 @@ impl LengthUnit {
 }
 
 #[derive(Clone, Copy)]
-enum MassUnit {
+pub enum MassUnit {
     Attogram,
     Femtogram,
     Picogram,
@@ -252,7 +252,6 @@ enum MassUnit {
     Grain,
     HundredweightLong,
     HundredweightShort,
-    Tonne,
     Ton,
     TonAssay,
     TonLong,
@@ -263,11 +262,10 @@ enum MassUnit {
     Pound,
     PoundTroy,
     Slug,
-    Stone,
 }
 
 impl MassUnit {
-    fn create(&self, value: f32) -> Mass {
+    pub fn create(&self, value: f32) -> Mass {
         match self {
             MassUnit::Attogram => Mass::new::<attogram>(value),
             MassUnit::Femtogram => Mass::new::<femtogram>(value),
@@ -295,7 +293,6 @@ impl MassUnit {
             MassUnit::Grain => Mass::new::<grain>(value),
             MassUnit::HundredweightLong => Mass::new::<hundredweight_long>(value),
             MassUnit::HundredweightShort => Mass::new::<hundredweight_short>(value),
-            MassUnit::Tonne => Mass::new::<tonne>(value),
             MassUnit::Ton => Mass::new::<ton>(value),
             MassUnit::TonAssay => Mass::new::<ton_assay>(value),
             MassUnit::TonLong => Mass::new::<ton_long>(value),
@@ -306,11 +303,10 @@ impl MassUnit {
             MassUnit::Pound => Mass::new::<pound>(value),
             MassUnit::PoundTroy => Mass::new::<pound_troy>(value),
             MassUnit::Slug => Mass::new::<slug>(value),
-            MassUnit::Stone => Mass::new::<stone>(value),
         }
     }
 
-    fn get(&self, mass: Mass) -> f32 {
+    pub fn get(&self, mass: Mass) -> f32 {
         match self {
             MassUnit::Attogram => mass.get::<attogram>(),
             MassUnit::Femtogram => mass.get::<femtogram>(),
@@ -338,7 +334,6 @@ impl MassUnit {
             MassUnit::Grain => mass.get::<grain>(),
             MassUnit::HundredweightLong => mass.get::<hundredweight_long>(),
             MassUnit::HundredweightShort => mass.get::<hundredweight_short>(),
-            MassUnit::Tonne => mass.get::<tonne>(),
             MassUnit::Ton => mass.get::<ton>(),
             MassUnit::TonAssay => mass.get::<ton_assay>(),
             MassUnit::TonLong => mass.get::<ton_long>(),
@@ -349,7 +344,6 @@ impl MassUnit {
             MassUnit::Pound => mass.get::<pound>(),
             MassUnit::PoundTroy => mass.get::<pound_troy>(),
             MassUnit::Slug => mass.get::<slug>(),
-            MassUnit::Stone => mass.get::<stone>(),
         }
     }
 }
