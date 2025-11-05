@@ -1,4 +1,3 @@
-use macroquad::prelude::draw_circle;
 use std::sync::LazyLock;
 use uom::si::{
     f32::{Acceleration, Length, Mass, Ratio, Time, Velocity},
@@ -129,23 +128,5 @@ impl Point {
 
         self.last_pos = current_pos;
         self.last_vel = current_vel;
-    }
-}
-
-/// Drawing implementations
-impl Point {
-    pub fn draw_circle(
-        &self,
-        pos_multiplier: Option<f32>,
-        mass_multiplier: Option<f32>,
-        color: macroquad::prelude::Color,
-    ) {
-        // println!("{:?}", self.pos.x.value * pos_multiplier.unwrap_or(1.));
-        draw_circle(
-            self.pos.x.value * pos_multiplier.unwrap_or(1.),
-            self.pos.y.value * pos_multiplier.unwrap_or(1.),
-            self.mass.value * mass_multiplier.unwrap_or(1.),
-            color,
-        );
     }
 }
