@@ -4,7 +4,7 @@ use molecular_dynamics::{
 };
 use physics_core::vector::Vector2D;
 use visualization::simulation::{
-    config::SimulationConfig,
+    config::SimulationConfigBuilder,
     units::{LengthUnit, MassUnit},
 };
 
@@ -23,13 +23,13 @@ use macroquad::prelude::*;
 #[macroquad::main("Argon Gas Simulation")]
 async fn main() {
     // Simulation config for Argon
-    let config = SimulationConfig {
-        time_step: Time::new::<femtosecond>(100.0),
-        length_unit: LengthUnit::Angstrom,
-        mass_unit: MassUnit::Dalton,
-        pixels_per_length: 4.0, // 4 pixels per angstrom
-        display_stats: false,
-    };
+    let config = SimulationConfigBuilder::default()
+        .time_step(Time::new::<femtosecond>(100.0))
+        .length_unit(LengthUnit::Angstrom)
+        .mass_unit(MassUnit::Dalton)
+        .pixels_per_length(4.0)
+        .build()
+        .unwrap();
 
     // Initialize argon atoms
     let max_bound = 100.0;

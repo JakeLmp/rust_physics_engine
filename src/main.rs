@@ -20,13 +20,14 @@ async fn main() {
     let mut passed_time = Time::new::<second>(0.0);
 
     // Simulation config for cluster demo
-    let config = SimulationConfig {
-        time_step: Time::new::<second>(100.),
-        length_unit: LengthUnit::Meter,
-        mass_unit: MassUnit::Kilogram,
-        pixels_per_length: 0.5,
-        display_stats: true,
-    };
+    let config = SimulationConfigBuilder::default()
+        .time_step(Time::new::<second>(100.))
+        .length_unit(LengthUnit::Meter)
+        .mass_unit(MassUnit::Kilogram)
+        .pixels_per_length(0.5)
+        .display_stats(true)
+        .build()
+        .unwrap();
 
     // Define bounds for cluster initialization
     let bounds = RectangularBounds {
@@ -41,6 +42,8 @@ async fn main() {
 
     // Newtonian gravity potential
     let potential = Gravity::default();
+
+    set_fullscreen(config.init_fullscreen);
 
     loop {
         clear_background(BLACK);

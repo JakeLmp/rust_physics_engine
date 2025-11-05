@@ -7,7 +7,7 @@ use molecular_dynamics::{
 };
 use physics_core::vector::Vector2D;
 use visualization::simulation::{
-    config::SimulationConfig,
+    config::SimulationConfigBuilder,
     units::{LengthUnit, MassUnit},
 };
 
@@ -25,13 +25,13 @@ use macroquad::prelude::*;
 #[macroquad::main("Earth-Moon System")]
 async fn main() {
     // Simulation config for Earth-Moon system
-    let config = SimulationConfig {
-        time_step: Time::new::<second>(1000.0),
-        length_unit: LengthUnit::Meter,
-        mass_unit: MassUnit::Kilogram,
-        pixels_per_length: 400.0 / 3.844e8, // scale to fit on screen
-        display_stats: false,
-    };
+    let config = SimulationConfigBuilder::default()
+        .time_step(Time::new::<second>(1000.0))
+        .length_unit(LengthUnit::Meter)
+        .mass_unit(MassUnit::Kilogram)
+        .pixels_per_length(400.0 / 3.844e8)
+        .build()
+        .unwrap();
 
     // Earth-Moon system parameters
     let earth_mass = Mass::new::<kilogram>(5.972e24); // Earth mass
