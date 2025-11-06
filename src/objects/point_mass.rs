@@ -1,10 +1,52 @@
+use macroquad::color::Color;
 use std::fmt;
 use uom::si::{
     f64::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
 };
 
-use crate::physics::{potential::Potential, vector::Vector2D};
+use crate::{
+    physics::{potential::Potential, vector::Vector2D},
+    simulation::{config::SimulationConfig, screen::Screen},
+};
+
+#[allow(dead_code)]
+pub enum StepType {
+    /// Naive update method (Rₖ₊₁ = Rₖ + τ × Vₖ) and equiv. for velocity
+    Naive,
+    /// Base Verlet update method
+    Verlet,
+    /// Velocity version of Verlet update method
+    VelocityVerlet,
+}
+
+pub trait NaiveStep {
+    fn naive_step(&mut self, time_step: Time);
+}
+
+pub trait VerletStep {
+    fn verlet_step(&mut self, time_step: Time);
+}
+
+pub trait VelocityVerletStep {
+    fn velocity_verlet_step(&mut self, time_step: Time);
+}
+
+pub trait PhysicalObject {
+    /// Method to reset acceleration before applying forces
+    fn reset_forces(&mut self);
+    /// Method to apply a force to the object
+    fn apply_force(&mut self, potential: &dyn Potential, other: &dyn PhysicalObject);
+    /// Method to apply a time step to the object
+    fn step(&mut self, step_type: Option<StepType>, time_step: Time);
+
+    // Getter methods for pairwise interactions
+    fn pos(&self) -> Vector2D<Length>;
+    fn mass(&self) -> Mass;
+
+    /// Method to draw the object to the Screen
+    fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color);
+}
 
 #[derive(Debug, Clone)]
 pub struct PointMass {
@@ -50,31 +92,19 @@ impl PointMass {
 }
 
 #[allow(dead_code)]
-pub enum StepType {
-    /// Naive update method (Rₖ₊₁ = Rₖ + τ × Vₖ) and equiv. for velocity
-    Naive,
-    /// Base Verlet update method
-    Verlet,
-    /// Velocity version of Verlet update method
-    VelocityVerlet,
-}
-
-/// Update implementations
-#[allow(dead_code)]
-impl PointMass {
-    /// Apply potential
-    pub fn apply_potential(&mut self, potential: &dyn Potential, others: &[&PointMass]) {
-        // Reset acceleration
+impl PhysicalObject for PointMass {
+    /// Reset force
+    fn reset_forces(&mut self) {
         self.acc = Vector2D::<Acceleration>::zero();
+    }
 
-        // Apply forces
-        for other in others {
-            self.acc += potential.force(self, other) / self.mass;
-        }
+    /// Apply potential resulting from other object
+    fn apply_force(&mut self, potential: &dyn Potential, other: &dyn PhysicalObject) {
+        self.acc += potential.force(self, other) / self.mass;
     }
 
     /// Update position parameters using different methods
-    pub fn step(&mut self, step_type: Option<StepType>, time_step: Time) {
+    fn step(&mut self, step_type: Option<StepType>, time_step: Time) {
         let step_type = step_type.unwrap_or(StepType::Naive);
 
         match step_type {
@@ -90,12 +120,33 @@ impl PointMass {
         }
     }
 
+    fn pos(&self) -> Vector2D<Length> {
+        self.pos
+    }
+    fn mass(&self) -> Mass {
+        self.mass
+    }
+
+    /// Draws a circle to the Screen
+    fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color) {
+        Screen::draw_point(
+            self,
+            &config,
+            Some(scale.unwrap_or(15.0 / config.mass_unit.get(self.mass()) as f32)),
+            color,
+        );
+    }
+}
+
+impl NaiveStep for PointMass {
     /// Naive update method
     fn naive_step(&mut self, time_step: Time) {
         self.pos += time_step * self.vel;
         self.vel += time_step * self.acc;
     }
+}
 
+impl VerletStep for PointMass {
     /// Verlet update method
     fn verlet_step(&mut self, time_step: Time) {
         // save before updating
@@ -111,7 +162,9 @@ impl PointMass {
 
         self.last_pos = current_pos;
     }
+}
 
+impl VelocityVerletStep for PointMass {
     /// Velocity Verlet update method variant
     fn velocity_verlet_step(&mut self, time_step: Time) {
         // save before updating

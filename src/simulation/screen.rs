@@ -23,13 +23,13 @@ impl Screen {
     pub fn draw_point(
         point: &PointMass,
         config: &SimulationConfig,
-        radius_multiplier: Option<f64>,
+        radius_multiplier: Option<f32>,
         color: Color,
     ) {
         let screen_pos = Self::world_to_screen(&point.pos, config);
-        let radius = config.mass_unit.get(point.mass) * radius_multiplier.unwrap_or(1.0);
+        let radius = config.mass_unit.get(point.mass) as f32 * radius_multiplier.unwrap_or(1.0);
 
-        draw_circle(screen_pos.x, screen_pos.y, radius as f32, color);
+        draw_circle(screen_pos.x, screen_pos.y, radius, color);
     }
 
     /// Get screen center
