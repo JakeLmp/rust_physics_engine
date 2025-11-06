@@ -9,7 +9,7 @@ use uom::si::{
 };
 use uom::typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0};
 
-use crate::{objects::point::Point, physics::vector::Vector2D};
+use crate::{objects::point::PointMass, physics::vector::Vector2D};
 
 #[allow(dead_code)]
 pub trait Potential {
@@ -19,10 +19,10 @@ pub trait Potential {
         Self: Sized;
 
     /// Potential energy between two points
-    fn energy(&self, point1: &Point, point2: &Point) -> Energy;
+    fn energy(&self, point1: &PointMass, point2: &PointMass) -> Energy;
 
     /// Force exerted on point1 by point2
-    fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force>;
+    fn force(&self, point1: &PointMass, point2: &PointMass) -> Vector2D<Force>;
 }
 
 // Define the type for G: m³/(kg·s²)
@@ -47,13 +47,13 @@ impl Potential for Gravity {
     }
 
     /// Gravitational potential energy: U = -G·m₁·m₂/r
-    fn energy(&self, point1: &Point, point2: &Point) -> Energy {
+    fn energy(&self, point1: &PointMass, point2: &PointMass) -> Energy {
         let r = point2.pos - point1.pos;
         -self.big_g * point1.mass * point2.mass / r.mag()
     }
 
     /// Gravitational force: F = G·m₁·m₂·r̂/r²
-    fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force> {
+    fn force(&self, point1: &PointMass, point2: &PointMass) -> Vector2D<Force> {
         let r: Vector2D<Length> = point1.pos - point2.pos;
         let r_mag: Length = r.mag();
         let r_hat: Vector2D<Ratio> = r / r_mag;
@@ -81,7 +81,7 @@ impl Potential for LennardJones {
     }
 
     /// Lennard-Jones potential energy: U = 4ε[(σ/r)¹² - (σ/r)⁶]
-    fn energy(&self, point1: &Point, point2: &Point) -> Energy {
+    fn energy(&self, point1: &PointMass, point2: &PointMass) -> Energy {
         let r: Vector2D<Length> = point2.pos - point1.pos;
         Ratio::new::<ratio>(4.0)
             * self.epsilon
@@ -89,7 +89,7 @@ impl Potential for LennardJones {
     }
 
     /// Lennard-Jones force: F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
-    fn force(&self, point1: &Point, point2: &Point) -> Vector2D<Force> {
+    fn force(&self, point1: &PointMass, point2: &PointMass) -> Vector2D<Force> {
         let r: Vector2D<Length> = point1.pos - point2.pos;
         let r_mag: Length = r.mag();
 
