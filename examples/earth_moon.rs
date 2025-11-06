@@ -1,10 +1,15 @@
-use physics_engine::objects::point_mass::{PointMass, StepType};
-use physics_engine::physics::potential::{Gravity, Potential};
-use physics_engine::physics::vector::Vector2D;
+use physics_engine::{
+    objects::point_mass::{PhysicalObject, PointMass, StepType},
+    physics::{
+        potential::{Gravity, Potential},
+        vector::Vector2D,
+    },
+    simulation::{
+        config::SimulationConfig,
+        units::{LengthUnit, MassUnit},
+    },
+};
 
-use physics_engine::simulation::config::SimulationConfig;
-use physics_engine::simulation::screen::Screen;
-use physics_engine::simulation::units::{LengthUnit, MassUnit};
 use uom::si::{
     acceleration::meter_per_second_squared,
     f64::{Acceleration, Length, Mass, Time, Velocity},
@@ -34,9 +39,9 @@ async fn main() {
     // Moon's orbital velocity around Earth (approximately 1022 m/s)
     let moon_orbital_velocity = Velocity::new::<meter_per_second>(1022.0);
 
-    let mut points: Vec<PointMass> = vec![
-        // Earth at origin (we'll use a reference frame centered on Earth)
-        PointMass::new(
+    let mut points: Vec<Box<dyn PhysicalObject>> = vec![
+        // Earth at origin
+        Box::new(PointMass::new(
             Vector2D {
                 x: Length::new::<meter>(0.0),
                 y: Length::new::<meter>(0.0),
@@ -51,9 +56,9 @@ async fn main() {
             },
             earth_mass,
             config.time_step,
-        ),
+        )),
         // Moon
-        PointMass::new(
+        Box::new(PointMass::new(
             Vector2D {
                 x: earth_moon_distance,
                 y: Length::new::<meter>(0.0),
@@ -68,7 +73,7 @@ async fn main() {
             },
             moon_mass,
             config.time_step,
-        ),
+        )),
     ];
 
     // Newtonian gravity potential
@@ -80,19 +85,26 @@ async fn main() {
         for i in 0..points.len() {
             let (left, right) = points.split_at_mut(i);
             let (current, right) = right.split_first_mut().unwrap();
-            let others: Vec<&PointMass> = left.iter().chain(right.iter()).collect();
+
+            current.reset_forces();
+
+            // Apply forces from objects before current
+            for other in left.iter() {
+                current.apply_force(&potential, other.as_ref());
+            }
+
+            // Apply forces from objects after current
+            for other in right.iter() {
+                current.apply_force(&potential, other.as_ref());
+            }
+
+            current.step(Some(StepType::Verlet), config.time_step);
 
             let color = if i == 0 { BLUE } else { WHITE };
-            Screen::draw_point(
-                current,
-                &config,
-                Some(15.0 / current.mass.get::<kilogram>()),
-                color,
-            );
-
-            current.apply_potential(&potential, &others);
-            current.step(Some(StepType::Verlet), config.time_step);
+            current.draw(&config, None, color);
         }
+
+        // println!();
 
         next_frame().await;
     }

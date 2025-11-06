@@ -1,10 +1,13 @@
-use physics_engine::objects::point_mass::{PointMass, StepType};
-use physics_engine::physics::potential::LennardJones;
-use physics_engine::physics::vector::Vector2D;
+use physics_engine::{
+    objects::point_mass::{PhysicalObject, PointMass, StepType},
+    physics::potential::LennardJones,
+    physics::vector::Vector2D,
+    simulation::{
+        config::SimulationConfig,
+        units::{LengthUnit, MassUnit},
+    },
+};
 
-use physics_engine::simulation::config::SimulationConfig;
-use physics_engine::simulation::screen::Screen;
-use physics_engine::simulation::units::{LengthUnit, MassUnit};
 use uom::si::{
     acceleration::meter_per_second_squared,
     energy::electronvolt,
@@ -29,9 +32,9 @@ async fn main() {
 
     // Initialize argon atoms
     let max_bound = 100.0;
-    let mut points: Vec<PointMass> = Vec::new();
+    let mut points: Vec<Box<dyn PhysicalObject>> = Vec::new();
     for _i in 0..100 {
-        points.push(PointMass::new(
+        points.push(Box::new(PointMass::new(
             Vector2D {
                 x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
                 y: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
@@ -46,7 +49,7 @@ async fn main() {
             },
             Mass::new::<dalton>(39.948),
             config.time_step,
-        ));
+        )));
     }
 
     // Lennard-Jones potential for Argon
@@ -63,16 +66,21 @@ async fn main() {
         for i in 0..points.len() {
             let (left, right) = points.split_at_mut(i);
             let (current, right) = right.split_first_mut().unwrap();
-            let others: Vec<&PointMass> = left.iter().chain(right.iter()).collect();
 
-            Screen::draw_point(
-                current,
-                &config,
-                Some(15.0 / current.mass.get::<dalton>()),
-                color,
-            );
-            current.apply_potential(&potential, &others);
+            current.reset_forces();
+
+            // Apply forces from objects before current
+            for other in left.iter() {
+                current.apply_force(&potential, other.as_ref());
+            }
+
+            // Apply forces from objects after current
+            for other in right.iter() {
+                current.apply_force(&potential, other.as_ref());
+            }
+
             current.step(Some(StepType::Verlet), config.time_step);
+            current.draw(&config, None, color);
         }
 
         next_frame().await;

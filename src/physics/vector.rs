@@ -5,6 +5,7 @@
 
 use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub, SubAssign};
 use uom::si::Quantity;
+
 /// A generic-typed 2D vector with x and y components.
 #[derive(Debug, Clone, Copy)]
 pub struct Vector2D<Q> {
