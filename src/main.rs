@@ -14,7 +14,7 @@ use uom::si::{
 
 use macroquad::prelude::*;
 
-use objects::point::{PointMass, StepType};
+use objects::point_mass::{PointMass, StepType};
 use physics::{
     potential::{Gravity, LennardJones, Potential},
     vector::Vector2D,
