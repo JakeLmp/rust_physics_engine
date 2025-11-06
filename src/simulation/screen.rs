@@ -1,7 +1,7 @@
 use macroquad::prelude::{Color, Vec2, draw_circle, screen_height, screen_width};
 use uom::si::f32::Length;
 
-use crate::objects::point::PointMass;
+use crate::objects::point_mass::PointMass;
 use crate::physics::vector::Vector2D;
 use crate::simulation::config::SimulationConfig;
 

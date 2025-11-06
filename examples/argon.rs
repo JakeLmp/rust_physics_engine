@@ -1,4 +1,4 @@
-use physics_engine::objects::point::{PointMass, StepType};
+use physics_engine::objects::point_mass::{PointMass, StepType};
 use physics_engine::physics::potential::LennardJones;
 use physics_engine::physics::vector::Vector2D;
 
