@@ -34,24 +34,26 @@ impl Cluster {
         for _i in 0..100 {
             objects.push(Box::new(PointMass::new(
                 Vector2D {
+                    // use config here to get the right units
                     x: Length::new::<angstrom>(rand::gen_range(
                         -config.length_unit.get(position_bounds.x1),
                         config.length_unit.get(position_bounds.x2),
                     )),
+                    // also here
                     y: Length::new::<angstrom>(rand::gen_range(
                         -config.length_unit.get(position_bounds.y1),
                         config.length_unit.get(position_bounds.y2),
                     )),
                 },
                 Vector2D {
-                    x: Velocity::new::<atomic_unit_of_velocity>(0.0),
-                    y: Velocity::new::<atomic_unit_of_velocity>(0.0),
+                    x: Velocity::new::<atomic_unit_of_velocity>(0.0), // and here
+                    y: Velocity::new::<atomic_unit_of_velocity>(0.0), // and here
                 },
                 Vector2D {
-                    x: Acceleration::new::<meter_per_second_squared>(0.0),
-                    y: Acceleration::new::<meter_per_second_squared>(0.0),
+                    x: Acceleration::new::<meter_per_second_squared>(0.0), // and here too
+                    y: Acceleration::new::<meter_per_second_squared>(0.0), // also here
                 },
-                Mass::new::<dalton>(39.948),
+                Mass::new::<dalton>(39.948), // don't forget here
                 config.time_step,
             )));
         }
@@ -60,6 +62,7 @@ impl Cluster {
     }
 
     fn center_of_mass(&self) -> Vector2D<Length> {
+        // and lastly here
         let mut com = Vector2D::<Length>::zero() * Mass::new::<dalton>(0.0);
         let mut total_mass = Mass::new::<dalton>(0.0);
         for object in &self.objects {
