@@ -1,7 +1,7 @@
 use macroquad::prelude::{Color, Vec2, draw_circle, screen_height, screen_width};
 use uom::si::f32::Length;
 
-use crate::objects::point::Point;
+use crate::objects::point::PointMass;
 use crate::physics::vector::Vector2D;
 use crate::simulation::config::SimulationConfig;
 
@@ -18,7 +18,7 @@ impl Screen {
 
     /// Draw a point as a circle on the screen
     pub fn draw_point(
-        point: &Point,
+        point: &PointMass,
         config: &SimulationConfig,
         radius_multiplier: Option<f32>,
         color: Color,

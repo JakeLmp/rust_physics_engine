@@ -1,4 +1,4 @@
-use physics_engine::objects::point::{Point, StepType};
+use physics_engine::objects::point::{PointMass, StepType};
 use physics_engine::physics::potential::LennardJones;
 use physics_engine::physics::vector::Vector2D;
 
@@ -30,9 +30,9 @@ async fn main() {
 
     // Initialize argon atoms
     let max_bound = 100.0;
-    let mut points: Vec<Point> = Vec::new();
+    let mut points: Vec<PointMass> = Vec::new();
     for _i in 0..100 {
-        points.push(Point::new(
+        points.push(PointMass::new(
             Vector2D {
                 x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
                 y: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
@@ -64,7 +64,7 @@ async fn main() {
         for i in 0..points.len() {
             let (left, right) = points.split_at_mut(i);
             let (current, right) = right.split_first_mut().unwrap();
-            let others: Vec<&Point> = left.iter().chain(right.iter()).collect();
+            let others: Vec<&PointMass> = left.iter().chain(right.iter()).collect();
 
             Screen::draw_point(
                 current,

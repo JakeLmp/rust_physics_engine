@@ -48,7 +48,7 @@ cargo clippy --all-targets --all-features -- -W clippy::pedantic
 
 See the [`docs/point.md`](docs/point.md) and [`docs/vector.md`](docs/vector.md) files for usage examples of the main types:
 
-- **Point**: Creating, updating, and drawing a physics point object.
+- **PointMass**: Creating and updating a physics point-mass object.
 - **Vector2D**: Performing vector math for physics calculations.
 
 These documentation pages include code snippets and explanations to help you get started with simulation and visualization.

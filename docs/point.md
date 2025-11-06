@@ -1,4 +1,4 @@
-# Point struct
+# PointMass struct
 
 ## Initialization
 
@@ -9,9 +9,9 @@ use uom::si::length::meter;
 use uom::si::mass::kilogram;
 use uom::si::velocity::meter_per_second;
 use crate::physics::vector::Vector2D;
-use crate::objects::point::{Point, StepType};
+use crate::objects::point::{PointMass, StepType};
 
-let mut point = Point::new(
+let mut point = PointMass::new(
     Vector2D {
         x: Length::new::<meter>(0.0),
         y: Length::new::<meter>(0.0),
@@ -27,7 +27,7 @@ let mut point = Point::new(
     Mass::new::<kilogram>(1.5),
 );
 
-println!("=== Point Showcase ===");
+println!("=== PointMass Showcase ===");
 println!(
     "Initial position: ({:.2} m, {:.2} m)",
     point.pos.x.get::<meter>(),
@@ -64,7 +64,7 @@ for i in 1..=3 {
 
 ```rust
 use macroquad::prelude::RED;
-use crate::objects::point::Point;
+use crate::objects::point::PointMass;
 
 // Assuming you have a point already created...
 // Draw the point as a circle with radius = mass * mass_multiplier

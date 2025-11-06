@@ -7,7 +7,7 @@ use uom::si::{
 use crate::physics::{potential::Potential, vector::Vector2D};
 
 #[derive(Debug, Clone)]
-pub struct Point {
+pub struct PointMass {
     pub pos: Vector2D<Length>,
     pub vel: Vector2D<Velocity>,
     pub acc: Vector2D<Acceleration>,
@@ -19,8 +19,8 @@ pub struct Point {
 }
 
 /// Initialisation
-impl Point {
-    /// Initialise a new Point
+impl PointMass {
+    /// Initialise a new PointMass
     pub fn new(
         pos: Vector2D<Length>,
         vel: Vector2D<Velocity>,
@@ -61,9 +61,9 @@ pub enum StepType {
 
 /// Update implementations
 #[allow(dead_code)]
-impl Point {
+impl PointMass {
     /// Apply potential
-    pub fn apply_potential(&mut self, potential: &dyn Potential, others: &[&Point]) {
+    pub fn apply_potential(&mut self, potential: &dyn Potential, others: &[&PointMass]) {
         // Reset acceleration
         self.acc = Vector2D::<Acceleration>::zero();
 
@@ -130,11 +130,11 @@ impl Point {
     }
 }
 
-impl fmt::Display for Point {
+impl fmt::Display for PointMass {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Point {{ pos: {:?}, vel: {:?}, acc: {:?}, mass: {:?} }}",
+            "PointMass {{ pos: {:?}, vel: {:?}, acc: {:?}, mass: {:?} }}",
             self.pos, self.vel, self.acc, self.mass
         )
     }

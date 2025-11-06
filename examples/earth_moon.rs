@@ -1,4 +1,4 @@
-use physics_engine::objects::point::{Point, StepType};
+use physics_engine::objects::point::{PointMass, StepType};
 use physics_engine::physics::potential::{Gravity, Potential};
 use physics_engine::physics::vector::Vector2D;
 
@@ -35,9 +35,9 @@ async fn main() {
     // Moon's orbital velocity around Earth (approximately 1022 m/s)
     let moon_orbital_velocity = Velocity::new::<meter_per_second>(1022.0);
 
-    let mut points: Vec<Point> = vec![
+    let mut points: Vec<PointMass> = vec![
         // Earth at origin (we'll use a reference frame centered on Earth)
-        Point::new(
+        PointMass::new(
             Vector2D {
                 x: Length::new::<meter>(0.0),
                 y: Length::new::<meter>(0.0),
@@ -54,7 +54,7 @@ async fn main() {
             config.time_step,
         ),
         // Moon
-        Point::new(
+        PointMass::new(
             Vector2D {
                 x: earth_moon_distance,
                 y: Length::new::<meter>(0.0),
@@ -81,7 +81,7 @@ async fn main() {
         for i in 0..points.len() {
             let (left, right) = points.split_at_mut(i);
             let (current, right) = right.split_first_mut().unwrap();
-            let others: Vec<&Point> = left.iter().chain(right.iter()).collect();
+            let others: Vec<&PointMass> = left.iter().chain(right.iter()).collect();
 
             let color = if i == 0 { BLUE } else { WHITE };
             Screen::draw_point(
