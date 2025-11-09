@@ -9,6 +9,8 @@ pub struct Screen;
 
 impl Screen {
     /// Convert world coordinates to screen coordinates using given config
+    #[must_use]
+    #[allow(clippy::cast_possible_truncation)]
     pub fn world_to_screen(pos: &Vector2D<Length>, config: &SimulationConfig) -> Vec2 {
         let x = config.length_unit.get(pos.x) * config.pixels_per_length;
         let y = config.length_unit.get(pos.y) * config.pixels_per_length;
@@ -20,6 +22,7 @@ impl Screen {
     }
 
     /// Draw a point as a circle on the screen
+    #[allow(clippy::cast_possible_truncation)]
     pub fn draw_point(
         point: &PointMass,
         config: &SimulationConfig,
@@ -33,11 +36,13 @@ impl Screen {
     }
 
     /// Get screen center
+    #[must_use]
     pub fn center() -> Vec2 {
         Vec2::new(screen_width() / 2.0, screen_height() / 2.0)
     }
 
     /// Get screen dimensions
+    #[must_use]
     pub fn dimensions() -> Vec2 {
         Vec2::new(screen_width(), screen_height())
     }

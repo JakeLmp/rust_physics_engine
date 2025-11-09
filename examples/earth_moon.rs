@@ -98,7 +98,7 @@ async fn main() {
                 current.apply_force(&potential, other.as_ref());
             }
 
-            current.step(Some(StepType::Verlet), config.time_step);
+            current.step(Some(&StepType::Verlet), config.time_step);
 
             let color = if i == 0 { BLUE } else { WHITE };
             current.draw(&config, None, color);

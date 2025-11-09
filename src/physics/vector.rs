@@ -18,6 +18,7 @@ where
     Q: Copy + uom::num_traits::Zero,
 {
     /// Initialise a zero-vector
+    #[must_use]
     pub fn zero() -> Self {
         Self {
             x: Q::zero(),
@@ -33,6 +34,7 @@ where
     Quantity<D, U, f64>: Copy,
 {
     /// Returns the magnitude of the vector.
+    #[must_use]
     pub fn mag(self) -> Quantity<D, U, f64> {
         let x_val = self.x.value;
         let y_val = self.y.value;

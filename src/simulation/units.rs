@@ -74,7 +74,61 @@ pub enum LengthUnit {
 }
 
 impl LengthUnit {
+    /// Creates a new Length in terms of the self-unit
+    #[must_use]
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(&self, value: f64) -> Length {
+        match self {
+            LengthUnit::Angstrom => Length::new::<angstrom>(value),
+            LengthUnit::AstronomicalUnit => Length::new::<astronomical_unit>(value),
+            LengthUnit::AtomicUnitOfLength => Length::new::<atomic_unit_of_length>(value),
+            LengthUnit::Attometer => Length::new::<attometer>(value),
+            LengthUnit::BohrRadius => Length::new::<bohr_radius>(value),
+            LengthUnit::Centimeter => Length::new::<centimeter>(value),
+            LengthUnit::Chain => Length::new::<chain>(value),
+            LengthUnit::Decameter => Length::new::<decameter>(value),
+            LengthUnit::Decimeter => Length::new::<decimeter>(value),
+            LengthUnit::Exameter => Length::new::<exameter>(value),
+            LengthUnit::Fathom => Length::new::<fathom>(value),
+            LengthUnit::Femtometer => Length::new::<femtometer>(value),
+            LengthUnit::Fermi => Length::new::<fermi>(value),
+            LengthUnit::Foot => Length::new::<foot>(value),
+            LengthUnit::FootSurvey => Length::new::<foot_survey>(value),
+            LengthUnit::Gigameter => Length::new::<gigameter>(value),
+            LengthUnit::Hectometer => Length::new::<hectometer>(value),
+            LengthUnit::Inch => Length::new::<inch>(value),
+            LengthUnit::Kilometer => Length::new::<kilometer>(value),
+            LengthUnit::LightYear => Length::new::<light_year>(value),
+            LengthUnit::Megameter => Length::new::<megameter>(value),
+            LengthUnit::Meter => Length::new::<meter>(value),
+            LengthUnit::Microinch => Length::new::<microinch>(value),
+            LengthUnit::Micrometer => Length::new::<micrometer>(value),
+            LengthUnit::Micron => Length::new::<micron>(value),
+            LengthUnit::Mil => Length::new::<mil>(value),
+            LengthUnit::Mile => Length::new::<mile>(value),
+            LengthUnit::MileSurvey => Length::new::<mile_survey>(value),
+            LengthUnit::Millimeter => Length::new::<millimeter>(value),
+            LengthUnit::Nanometer => Length::new::<nanometer>(value),
+            LengthUnit::NauticalMile => Length::new::<nautical_mile>(value),
+            LengthUnit::Parsec => Length::new::<parsec>(value),
+            LengthUnit::Petameter => Length::new::<petameter>(value),
+            LengthUnit::PicaComputer => Length::new::<pica_computer>(value),
+            LengthUnit::PicaPrinters => Length::new::<pica_printers>(value),
+            LengthUnit::Picometer => Length::new::<picometer>(value),
+            LengthUnit::PointComputer => Length::new::<point_computer>(value),
+            LengthUnit::PointPrinters => Length::new::<point_printers>(value),
+            LengthUnit::Rod => Length::new::<rod>(value),
+            LengthUnit::Terameter => Length::new::<terameter>(value),
+            LengthUnit::Yard => Length::new::<yard>(value),
+            LengthUnit::Yoctometer => Length::new::<yoctometer>(value),
+            LengthUnit::Yottameter => Length::new::<yottameter>(value),
+            LengthUnit::Zeptometer => Length::new::<zeptometer>(value),
+            LengthUnit::Zettameter => Length::new::<zettameter>(value),
+        }
+    }
+
     /// Gets the length value f64 in terms of the self-unit
+    #[must_use]
     pub fn get(&self, length: Length) -> f64 {
         match self {
             LengthUnit::Angstrom => length.get::<angstrom>(),
@@ -168,7 +222,52 @@ pub enum MassUnit {
 }
 
 impl MassUnit {
+    /// Creates a new Mass in terms of the self-unit
+    #[must_use]
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(&self, value: f64) -> Mass {
+        match self {
+            MassUnit::Attogram => Mass::new::<attogram>(value),
+            MassUnit::Femtogram => Mass::new::<femtogram>(value),
+            MassUnit::Picogram => Mass::new::<picogram>(value),
+            MassUnit::Nanogram => Mass::new::<nanogram>(value),
+            MassUnit::Microgram => Mass::new::<microgram>(value),
+            MassUnit::Milligram => Mass::new::<milligram>(value),
+            MassUnit::Centigram => Mass::new::<centigram>(value),
+            MassUnit::Decigram => Mass::new::<decigram>(value),
+            MassUnit::Gram => Mass::new::<gram>(value),
+            MassUnit::Decagram => Mass::new::<decagram>(value),
+            MassUnit::Hectogram => Mass::new::<hectogram>(value),
+            MassUnit::Kilogram => Mass::new::<kilogram>(value),
+            MassUnit::Megagram => Mass::new::<megagram>(value),
+            MassUnit::Gigagram => Mass::new::<gigagram>(value),
+            MassUnit::Teragram => Mass::new::<teragram>(value),
+            MassUnit::Petagram => Mass::new::<petagram>(value),
+            MassUnit::Exagram => Mass::new::<exagram>(value),
+            MassUnit::Zettagram => Mass::new::<zettagram>(value),
+            MassUnit::Yottagram => Mass::new::<yottagram>(value),
+            MassUnit::Yoctogram => Mass::new::<yoctogram>(value),
+            MassUnit::Zeptogram => Mass::new::<zeptogram>(value),
+            MassUnit::Dalton => Mass::new::<dalton>(value),
+            MassUnit::Carat => Mass::new::<carat>(value),
+            MassUnit::Grain => Mass::new::<grain>(value),
+            MassUnit::HundredweightLong => Mass::new::<hundredweight_long>(value),
+            MassUnit::HundredweightShort => Mass::new::<hundredweight_short>(value),
+            MassUnit::Ton => Mass::new::<ton>(value),
+            MassUnit::TonAssay => Mass::new::<ton_assay>(value),
+            MassUnit::TonLong => Mass::new::<ton_long>(value),
+            MassUnit::TonShort => Mass::new::<ton_short>(value),
+            MassUnit::Ounce => Mass::new::<ounce>(value),
+            MassUnit::OunceTroy => Mass::new::<ounce_troy>(value),
+            MassUnit::Pennyweight => Mass::new::<pennyweight>(value),
+            MassUnit::Pound => Mass::new::<pound>(value),
+            MassUnit::PoundTroy => Mass::new::<pound_troy>(value),
+            MassUnit::Slug => Mass::new::<slug>(value),
+        }
+    }
+
     /// Gets the mass value f64 in terms of the self-unit
+    #[must_use]
     pub fn get(&self, mass: Mass) -> f64 {
         match self {
             MassUnit::Attogram => mass.get::<attogram>(),
