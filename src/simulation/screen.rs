@@ -1,4 +1,6 @@
 use macroquad::prelude::{Color, Vec2, WHITE, draw_circle, draw_text, screen_height, screen_width};
+use macroquad::text::measure_text;
+
 use uom::si::Quantity;
 use uom::si::f64::Length;
 
@@ -53,21 +55,22 @@ impl Screen {
         screen_pos: ScreenPosition,
         padding: Option<f32>,
         line_height: Option<f32>,
+        font_size: Option<f32>,
         text_color: Option<macroquad::color::Color>,
     ) {
         let pad = padding.unwrap_or(20.0);
         let line_h = line_height.unwrap_or(20.0);
+        let font_s = font_size.unwrap_or(20.0);
         let color = text_color.unwrap_or(WHITE);
 
         let mut x = 0.0;
         let mut y = 0.0;
+
         match screen_pos {
             ScreenPosition::Top => {
-                x = screen_width() / 2.0;
                 y = pad;
             }
             ScreenPosition::Bottom => {
-                x = screen_width() / 2.0;
                 y = screen_height() - pad - (stats.len() as f32 * line_h);
             }
             ScreenPosition::Left => {
@@ -98,7 +101,21 @@ impl Screen {
 
         for (i, (name, value)) in stats.iter().enumerate() {
             let text = format!("{name}: {value}");
-            draw_text(&text, x, y + i as f32 * line_h, 20.0, color);
+            let text_dimensions = measure_text(&text, None, font_s as u16, 1.0);
+
+            let draw_x = match screen_pos {
+                ScreenPosition::Top | ScreenPosition::Bottom => {
+                    // Center horizontally
+                    screen_width() / 2.0 - text_dimensions.width / 2.0
+                }
+                ScreenPosition::Right | ScreenPosition::TopRight | ScreenPosition::BottomRight => {
+                    // Right align
+                    x - text_dimensions.width
+                }
+                _ => x, // Left align
+            };
+
+            draw_text(&text, draw_x, y + i as f32 * line_h, font_s, color);
         }
     }
 
