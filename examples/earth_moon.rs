@@ -29,6 +29,7 @@ async fn main() {
         length_unit: LengthUnit::Meter,
         mass_unit: MassUnit::Kilogram,
         pixels_per_length: 400.0 / 3.844e8, // scale to fit on screen
+        display_stats: false,
     };
 
     // Earth-Moon system parameters

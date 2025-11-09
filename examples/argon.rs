@@ -28,6 +28,7 @@ async fn main() {
         length_unit: LengthUnit::Angstrom,
         mass_unit: MassUnit::Dalton,
         pixels_per_length: 4.0, // 4 pixels per angstrom
+        display_stats: false,
     };
 
     // Initialize argon atoms
