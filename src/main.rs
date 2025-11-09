@@ -3,76 +3,42 @@ mod physics;
 mod simulation;
 
 use uom::si::{
-    acceleration::meter_per_second_squared,
-    f64::{Acceleration, Length, Mass, Time, Velocity},
+    f64::{Length, Time},
     length::meter,
-    mass::kilogram,
     time::second,
-    velocity::meter_per_second,
 };
 
 use macroquad::prelude::*;
 
-use objects::point_mass::{PhysicalObject, PointMass, StepType};
+use objects::point_mass::StepType;
 use physics::{
+    cluster::{Cluster, RectangularBounds},
     potential::{Gravity, Potential},
-    vector::Vector2D,
 };
 use simulation::config::*;
+use simulation::screen::Screen;
 use simulation::units::*;
 
 #[macroquad::main("Physics")]
 async fn main() {
-    // Simulation config for Earth-Moon system
+    // Simulation config for cluster demo
     let config = SimulationConfig {
-        time_step: Time::new::<second>(1000.0), // 1000 seconds per step
+        time_step: Time::new::<second>(100.),
         length_unit: LengthUnit::Meter,
         mass_unit: MassUnit::Kilogram,
-        pixels_per_length: 400.0 / 3.844e8, // scale to fit on screen
+        pixels_per_length: 2.0,
     };
 
-    // Earth-Moon system parameters
-    let earth_mass = Mass::new::<kilogram>(5.972e24);
-    let moon_mass = Mass::new::<kilogram>(7.342e22);
-    let earth_moon_distance = Length::new::<meter>(3.844e8);
-    let moon_orbital_velocity = Velocity::new::<meter_per_second>(1022.0);
+    // Define bounds for cluster initialization
+    let bounds = RectangularBounds {
+        x1: Length::new::<meter>(-200.0),
+        x2: Length::new::<meter>(200.0),
+        y1: Length::new::<meter>(-100.0),
+        y2: Length::new::<meter>(100.0),
+    };
 
-    let mut points: Vec<Box<dyn PhysicalObject>> = vec![
-        // Earth at origin
-        Box::new(PointMass::new(
-            Vector2D {
-                x: Length::new::<meter>(0.0),
-                y: Length::new::<meter>(0.0),
-            },
-            Vector2D {
-                x: Velocity::new::<meter_per_second>(0.0),
-                y: Velocity::new::<meter_per_second>(0.0),
-            },
-            Vector2D {
-                x: Acceleration::new::<meter_per_second_squared>(0.0),
-                y: Acceleration::new::<meter_per_second_squared>(0.0),
-            },
-            earth_mass,
-            config.time_step,
-        )),
-        // Moon
-        Box::new(PointMass::new(
-            Vector2D {
-                x: earth_moon_distance,
-                y: Length::new::<meter>(0.0),
-            },
-            Vector2D {
-                x: Velocity::new::<meter_per_second>(0.0),
-                y: moon_orbital_velocity,
-            },
-            Vector2D {
-                x: Acceleration::new::<meter_per_second_squared>(0.0),
-                y: Acceleration::new::<meter_per_second_squared>(0.0),
-            },
-            moon_mass,
-            config.time_step,
-        )),
-    ];
+    // Create cluster
+    let mut cluster = Cluster::new(&config, &bounds);
 
     // Newtonian gravity potential
     let potential = Gravity::default();
@@ -80,29 +46,18 @@ async fn main() {
     loop {
         clear_background(BLACK);
 
-        for i in 0..points.len() {
-            let (left, right) = points.split_at_mut(i);
-            let (current, right) = right.split_first_mut().unwrap();
+        // Step the cluster simulation
+        cluster.step(&config, &potential, Some(&StepType::Verlet));
 
-            current.reset_forces();
-
-            // Apply forces from objects before current
-            for other in left.iter() {
-                current.apply_force(&potential, other.as_ref());
-            }
-
-            // Apply forces from objects after current
-            for other in right.iter() {
-                current.apply_force(&potential, other.as_ref());
-            }
-
-            current.step(Some(StepType::Verlet), config.time_step);
-
-            let color = if i == 0 { BLUE } else { WHITE };
-            current.draw(&config, None, color);
+        // Draw all objects in the cluster
+        for object in &cluster.objects {
+            object.draw(&config, None, WHITE);
         }
 
-        // println!();
+        // Optional: Draw center of mass
+        let com = cluster.center_of_mass();
+        let screen_pos = Screen::world_to_screen(&com, &config);
+        draw_circle(screen_pos.x, screen_pos.y, 5.0, RED);
 
         next_frame().await;
     }

@@ -79,7 +79,7 @@ async fn main() {
                 current.apply_force(&potential, other.as_ref());
             }
 
-            current.step(Some(StepType::Verlet), config.time_step);
+            current.step(Some(&StepType::Verlet), config.time_step);
             current.draw(&config, None, color);
         }
 

@@ -65,7 +65,7 @@ impl Potential for Gravity {
 /// The Lennard-Jones potential, commonly used in molecular dynamics
 /// Typical value examples
 /// Xenon: ε = 0.0184 eV, σ = 4.10 Å
-/// Argon: ε = 0.0104 eV (or ε/k_B = 119.8 K), σ = 3.40 Å
+/// Argon: ε = 0.0104 eV (or `ε/k_B` = 119.8 K), σ = 3.40 Å
 pub struct LennardJones {
     pub epsilon: Energy,
     pub sigma: Length,

@@ -1,6 +1,6 @@
 use uom::si::f64::Time;
 
-use crate::simulation::units::*;
+use crate::simulation::units::{LengthUnit, MassUnit};
 
 pub struct SimulationConfig {
     pub time_step: Time,

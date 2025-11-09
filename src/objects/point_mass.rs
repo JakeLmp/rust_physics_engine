@@ -38,10 +38,12 @@ pub trait PhysicalObject {
     /// Method to apply a force to the object
     fn apply_force(&mut self, potential: &dyn Potential, other: &dyn PhysicalObject);
     /// Method to apply a time step to the object
-    fn step(&mut self, step_type: Option<StepType>, time_step: Time);
+    fn step(&mut self, step_type: Option<&StepType>, time_step: Time);
 
     // Getter methods for pairwise interactions
     fn pos(&self) -> Vector2D<Length>;
+    fn vel(&self) -> Vector2D<Velocity>;
+    fn acc(&self) -> Vector2D<Acceleration>;
     fn mass(&self) -> Mass;
 
     /// Method to draw the object to the Screen
@@ -62,7 +64,8 @@ pub struct PointMass {
 
 /// Initialisation
 impl PointMass {
-    /// Initialise a new PointMass
+    /// Initialise a new `PointMass`
+    #[must_use]
     pub fn new(
         pos: Vector2D<Length>,
         vel: Vector2D<Velocity>,
@@ -104,8 +107,8 @@ impl PhysicalObject for PointMass {
     }
 
     /// Update position parameters using different methods
-    fn step(&mut self, step_type: Option<StepType>, time_step: Time) {
-        let step_type = step_type.unwrap_or(StepType::Naive);
+    fn step(&mut self, step_type: Option<&StepType>, time_step: Time) {
+        let step_type = step_type.unwrap_or(&StepType::Naive);
 
         match step_type {
             StepType::Naive => {
@@ -123,15 +126,22 @@ impl PhysicalObject for PointMass {
     fn pos(&self) -> Vector2D<Length> {
         self.pos
     }
+    fn vel(&self) -> Vector2D<Velocity> {
+        self.vel
+    }
+    fn acc(&self) -> Vector2D<Acceleration> {
+        self.acc
+    }
     fn mass(&self) -> Mass {
         self.mass
     }
 
     /// Draws a circle to the Screen
+    #[allow(clippy::cast_possible_truncation)]
     fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color) {
         Screen::draw_point(
             self,
-            &config,
+            config,
             Some(scale.unwrap_or(15.0 / config.mass_unit.get(self.mass()) as f32)),
             color,
         );

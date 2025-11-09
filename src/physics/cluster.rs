@@ -1,73 +1,100 @@
 use macroquad::prelude::rand;
 use uom::si::{
-    acceleration::meter_per_second_squared,
-    f32::{Acceleration, Length, Mass, Velocity},
-    length::angstrom,
-    mass::dalton,
-    velocity::atomic_unit_of_velocity,
+    f64::{Acceleration, Length, Mass, Velocity},
+    mass::kilogram,
 };
 
 use crate::{
-    objects::point_mass::{PhysicalObject, PointMass},
-    physics::vector::Vector2D,
+    objects::point_mass::{PhysicalObject, PointMass, StepType},
+    physics::{potential::Potential, vector::Vector2D},
     simulation::config::SimulationConfig,
 };
 
-/// A cluster of objects, e.g. PointMasses
+/// A cluster of objects, e.g. `PointMasses`
 pub struct Cluster {
     /// The objects in question
-    /// objects must implement the PhysicalObject trait
+    /// provided objects must implement the `PhysicalObject` trait
     pub objects: Vec<Box<dyn PhysicalObject>>,
 }
 
+#[derive(Debug)]
 pub struct RectangularBounds {
-    x1: Length,
-    x2: Length,
-    y1: Length,
-    y2: Length,
+    pub x1: Length,
+    pub x2: Length,
+    pub y1: Length,
+    pub y2: Length,
 }
 
 impl Cluster {
-    fn new(config: &SimulationConfig, position_bounds: RectangularBounds) -> Self {
+    #[must_use]
+    #[allow(clippy::cast_possible_truncation)]
+    pub fn new(config: &SimulationConfig, position_bounds: &RectangularBounds) -> Self {
         // Initialize argon atoms
         let mut objects: Vec<Box<dyn PhysicalObject>> = Vec::new();
         for _i in 0..100 {
             objects.push(Box::new(PointMass::new(
                 Vector2D {
-                    // use config here to get the right units
-                    x: Length::new::<angstrom>(rand::gen_range(
-                        -config.length_unit.get(position_bounds.x1),
-                        config.length_unit.get(position_bounds.x2),
-                    )),
-                    // also here
-                    y: Length::new::<angstrom>(rand::gen_range(
-                        -config.length_unit.get(position_bounds.y1),
-                        config.length_unit.get(position_bounds.y2),
-                    )),
+                    x: config.length_unit.new(f64::from(rand::gen_range(
+                        config.length_unit.get(position_bounds.x1) as f32,
+                        config.length_unit.get(position_bounds.x2) as f32,
+                    ))),
+                    y: config.length_unit.new(f64::from(rand::gen_range(
+                        config.length_unit.get(position_bounds.y1) as f32,
+                        config.length_unit.get(position_bounds.y2) as f32,
+                    ))),
                 },
-                Vector2D {
-                    x: Velocity::new::<atomic_unit_of_velocity>(0.0), // and here
-                    y: Velocity::new::<atomic_unit_of_velocity>(0.0), // and here
-                },
-                Vector2D {
-                    x: Acceleration::new::<meter_per_second_squared>(0.0), // and here too
-                    y: Acceleration::new::<meter_per_second_squared>(0.0), // also here
-                },
-                Mass::new::<dalton>(39.948), // don't forget here
+                // units don't matter here, as long as we're initialising with zero-vector
+                Vector2D::<Velocity>::zero(),
+                Vector2D::<Acceleration>::zero(),
+                config.mass_unit.new(500.),
                 config.time_step,
             )));
         }
 
-        Self { objects: objects }
+        Self { objects }
     }
 
-    fn center_of_mass(&self) -> Vector2D<Length> {
-        // and lastly here
-        let mut com = Vector2D::<Length>::zero() * Mass::new::<dalton>(0.0);
-        let mut total_mass = Mass::new::<dalton>(0.0);
-        for object in &self.objects {
-            com += object.pos() * object.mass();
+    #[must_use]
+    pub fn center_of_mass(&self) -> Vector2D<Length> {
+        // Single pass-over to calculate weighted sum and total mass
+        let (weighted_sum, total_mass) = self.objects.iter().fold(
+            (
+                Vector2D::<Length>::zero() * Mass::new::<kilogram>(0.0),
+                Mass::new::<kilogram>(0.0),
+            ),
+            |(com, total_mass), obj| (com + obj.pos() * obj.mass(), total_mass + obj.mass()),
+        );
+        weighted_sum / total_mass
+    }
+
+    /// Steps the simulation forward by one time step.
+    pub fn step(
+        &mut self,
+        config: &SimulationConfig,
+        potential: &impl Potential,
+        step_type: Option<&StepType>,
+    ) {
+        if self.objects.is_empty() {
+            return;
+        };
+
+        for i in 0..self.objects.len() {
+            let (left, right) = self.objects.split_at_mut(i);
+            let (current, right) = right.split_first_mut().unwrap();
+
+            current.reset_forces();
+
+            // Apply forces from objects before current
+            for other in left.iter() {
+                current.apply_force(potential, other.as_ref());
+            }
+
+            // Apply forces from objects after current
+            for other in right.iter() {
+                current.apply_force(potential, other.as_ref());
+            }
+
+            current.step(step_type, config.time_step);
         }
-        com / total_mass
     }
 }
