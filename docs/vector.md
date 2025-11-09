@@ -1,9 +1,84 @@
+# Vector2D
+
+The `Vector2D` struct provides a generic, unit-safe 2D vector type for physics calculations. It supports arithmetic operations, magnitude calculation, chaining, and is compatible with the [uom](https://docs.rs/uom/) units library.
+
+## Usage
+
+Create vectors with physical units:
+
 ```rust
 use uom::si::f32::{Length, Ratio};
 use uom::si::length::meter;
 use uom::si::ratio::ratio;
 use crate::physics::vector::Vector2D;
 
+let v1 = Vector2D {
+    x: Length::new::<meter>(3.0),
+    y: Length::new::<meter>(4.0),
+};
+let v2 = Vector2D {
+    x: Length::new::<meter>(1.0),
+    y: Length::new::<meter>(2.0),
+};
+```
+
+## Arithmetic
+
+- **Zero vector:**
+  Create a zero vector for any unit type:
+  ```rust
+  let z = Vector2D::<Length>::zero();
+  ```
+
+- **Addition and subtraction:**
+  ```rust
+  let v3 = v1 + v2;
+  let v4 = v1 - v2;
+  ```
+
+- **Assignment operators:**
+  ```rust
+  let mut v = v1;
+  v += v2;
+  v -= v2;
+  ```
+
+- **Unary negation:**
+  Reverse the direction of a vector:
+  ```rust
+  let neg_v1 = -v1;
+  ```
+
+- **Multiplication by scalar (both orderings):**
+  You can multiply a vector by a scalar, or a scalar by a vector:
+  ```rust
+  let scalar = Ratio::new::<ratio>(2.5);
+  let v_scaled = v1 * scalar;
+  let v_scaled2 = scalar * v1;
+  ```
+  > **Note:**
+  > Multiplying a scalar by a vector (e.g., `scalar * v1`) is only implemented for specific quantity types using a macro in the codebase.
+  > If you need this for a not-yet-supported quantity, use the `impl_vector_mul!` macro in your code:
+  > ```rust
+  > impl_vector_mul!(YourQuantityType);
+  > ```
+  > This will enable scalar-vector multiplication for your quantity.
+
+- **Division by scalar:**
+  ```rust
+  let v_div = v1 / scalar;
+  ```
+
+## Magnitude
+
+Calculate the magnitude (length) of a vector:
+```rust
+let mag = v1.mag();
+```
+
+## Showcase
+
+```rust
 // Create some vectors
 let v1 = Vector2D {
     x: Length::new::<meter>(3.0),
@@ -130,3 +205,14 @@ println!(
 );
 println!("Magnitude of result: {} m", result.mag().get::<meter>());
 ```
+
+## Methods
+
+- `zero()`: Returns a zero vector.
+- `mag()`: Returns the magnitude of the vector.
+- Arithmetic operators: `+`, `-`, `*`, `/` (with scalars and other vectors).
+- Assignment operators: `+=`, `-=`.
+- Unary negation: `-vector` reverses direction.
+- Compatible with any unit type supported by `uom`.
+
+See also: [`PointMass`](point_mass.md), [`Cluster`](cluster.md)

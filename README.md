@@ -44,12 +44,14 @@ cargo fmt
 cargo clippy --all-targets --all-features -- -W clippy::pedantic
 ```
 
-## Examples
+## Examples & Documentation
 
-See the [`docs/point.md`](docs/point.md) and [`docs/vector.md`](docs/vector.md) files for usage examples of the main types:
+See the documentation files in the [`docs/`](docs/) folder for usage examples and explanations of the main types and traits:
 
-- **PointMass**: Creating and updating a physics point-mass object.
-- **Vector2D**: Performing vector math for physics calculations.
+- [`physical_object.md`](docs/physical_object.md): The `PhysicalObject` trait and its implementations.
+- [`point_mass.md`](docs/point_mass.md): Creating and updating a physics point-mass object.
+- [`cluster.md`](docs/cluster.md): Managing and simulating clusters of physical objects.
+- [`vector.md`](docs/vector.md): Performing vector math for physics calculations.
 
 These documentation pages include code snippets and explanations to help you get started with simulation and visualization.
 
