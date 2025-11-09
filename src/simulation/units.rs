@@ -5,7 +5,7 @@
 //! scaling of simulation parameters.
 
 use uom::si::{
-    f32::{Length, Mass},
+    f64::{Length, Mass},
     length::{
         angstrom, astronomical_unit, atomic_unit_of_length, attometer, bohr_radius, centimeter,
         chain, decameter, decimeter, exameter, fathom, femtometer, fermi, foot, foot_survey,
@@ -74,8 +74,8 @@ pub enum LengthUnit {
 }
 
 impl LengthUnit {
-    /// Gets the length value f32 in terms of the self-unit
-    pub fn get(&self, length: Length) -> f32 {
+    /// Gets the length value f64 in terms of the self-unit
+    pub fn get(&self, length: Length) -> f64 {
         match self {
             LengthUnit::Angstrom => length.get::<angstrom>(),
             LengthUnit::AstronomicalUnit => length.get::<astronomical_unit>(),
@@ -168,8 +168,8 @@ pub enum MassUnit {
 }
 
 impl MassUnit {
-    /// Gets the mass value f32 in terms of the self-unit
-    pub fn get(&self, mass: Mass) -> f32 {
+    /// Gets the mass value f64 in terms of the self-unit
+    pub fn get(&self, mass: Mass) -> f64 {
         match self {
             MassUnit::Attogram => mass.get::<attogram>(),
             MassUnit::Femtogram => mass.get::<femtogram>(),

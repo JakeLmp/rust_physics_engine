@@ -1,7 +1,7 @@
 use uom::si::{
     ISQ, Quantity, SI,
     energy::electronvolt,
-    f32::{Energy, Force, Length, Mass, Ratio, Time},
+    f64::{Energy, Force, Length, Mass, Ratio, Time},
     length::{angstrom, meter},
     mass::kilogram,
     ratio::ratio,
@@ -28,8 +28,8 @@ pub trait Potential {
 // Define the type for G: m³/(kg·s²)
 pub type GravitationalParameter = Quantity<
     ISQ<P3, N1, N2, Z0, Z0, Z0, Z0>, // L³·M⁻¹·T⁻²
-    SI<f32>,
-    f32,
+    SI<f64>,
+    f64,
 >;
 
 /// Newtonian Gravity potential.

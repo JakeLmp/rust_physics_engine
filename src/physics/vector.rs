@@ -25,14 +25,14 @@ where
     }
 }
 
-impl<D, U> Vector2D<Quantity<D, U, f32>>
+impl<D, U> Vector2D<Quantity<D, U, f64>>
 where
     D: uom::si::Dimension + ?Sized,
-    U: uom::si::Units<f32> + ?Sized,
-    Quantity<D, U, f32>: Copy,
+    U: uom::si::Units<f64> + ?Sized,
+    Quantity<D, U, f64>: Copy,
 {
     /// Returns the magnitude of the vector.
-    pub fn mag(self) -> Quantity<D, U, f32> {
+    pub fn mag(self) -> Quantity<D, U, f64> {
         let x_val = self.x.value;
         let y_val = self.y.value;
         let magnitude = (x_val * x_val + y_val * y_val).sqrt();
@@ -165,7 +165,7 @@ macro_rules! impl_vector_mul {
 }
 
 // Add more quantities here as needed
-use uom::si::f32::{Acceleration, Force, Length, Mass, Ratio, Time, Velocity};
+use uom::si::f64::{Acceleration, Force, Length, Mass, Ratio, Time, Velocity};
 impl_vector_mul!(Acceleration);
 impl_vector_mul!(Force);
 impl_vector_mul!(Length);
