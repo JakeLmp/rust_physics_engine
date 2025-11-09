@@ -5,7 +5,7 @@ mod simulation;
 use uom::si::{
     acceleration::meter_per_second_squared,
     energy::electronvolt,
-    f32::{Acceleration, Energy, Length, Mass, Time, Velocity},
+    f64::{Acceleration, Energy, Length, Mass, Time, Velocity},
     length::angstrom,
     mass::{dalton, kilogram},
     time::{day, femtosecond, second},

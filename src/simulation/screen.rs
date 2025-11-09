@@ -1,5 +1,5 @@
 use macroquad::prelude::{Color, Vec2, draw_circle, screen_height, screen_width};
-use uom::si::f32::Length;
+use uom::si::f64::Length;
 
 use crate::objects::point_mass::PointMass;
 use crate::physics::vector::Vector2D;
@@ -13,20 +13,23 @@ impl Screen {
         let x = config.length_unit.get(pos.x) * config.pixels_per_length;
         let y = config.length_unit.get(pos.y) * config.pixels_per_length;
 
-        Vec2::new(screen_width() / 2.0 + x, screen_height() / 2.0 + y)
+        Vec2::new(
+            screen_width() / 2.0 + x as f32,
+            screen_height() / 2.0 + y as f32,
+        )
     }
 
     /// Draw a point as a circle on the screen
     pub fn draw_point(
         point: &PointMass,
         config: &SimulationConfig,
-        radius_multiplier: Option<f32>,
+        radius_multiplier: Option<f64>,
         color: Color,
     ) {
         let screen_pos = Self::world_to_screen(&point.pos, config);
         let radius = config.mass_unit.get(point.mass) * radius_multiplier.unwrap_or(1.0);
 
-        draw_circle(screen_pos.x, screen_pos.y, radius, color);
+        draw_circle(screen_pos.x, screen_pos.y, radius as f32, color);
     }
 
     /// Get screen center

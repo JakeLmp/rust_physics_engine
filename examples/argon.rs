@@ -5,11 +5,10 @@ use physics_engine::physics::vector::Vector2D;
 use physics_engine::simulation::config::SimulationConfig;
 use physics_engine::simulation::screen::Screen;
 use physics_engine::simulation::units::{LengthUnit, MassUnit};
-use uom::si::f32::Time;
 use uom::si::{
     acceleration::meter_per_second_squared,
     energy::electronvolt,
-    f32::{Acceleration, Energy, Length, Mass, Velocity},
+    f64::{Acceleration, Energy, Length, Mass, Time, Velocity},
     length::angstrom,
     mass::dalton,
     time::femtosecond,

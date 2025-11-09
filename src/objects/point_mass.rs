@@ -1,6 +1,6 @@
 use std::fmt;
 use uom::si::{
-    f32::{Acceleration, Length, Mass, Ratio, Time, Velocity},
+    f64::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
 };
 
