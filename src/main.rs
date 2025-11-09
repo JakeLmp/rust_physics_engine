@@ -68,7 +68,8 @@ async fn main() {
         if config.display_stats {
             Screen::display_stats(
                 &[("time", &(passed_time.value as f32))],
-                simulation::screen::ScreenPosition::TopLeft,
+                simulation::screen::ScreenPosition::TopRight,
+                None,
                 None,
                 None,
                 None,
