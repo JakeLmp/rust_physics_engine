@@ -7,4 +7,5 @@ pub struct SimulationConfig {
     pub length_unit: LengthUnit,
     pub mass_unit: MassUnit,
     pub pixels_per_length: f64,
+    pub display_stats: bool,
 }

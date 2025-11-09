@@ -19,14 +19,17 @@ use simulation::config::*;
 use simulation::screen::Screen;
 use simulation::units::*;
 
-#[macroquad::main("Physics")]
+#[macroquad::main("Physics Engine")]
 async fn main() {
+    let mut passed_time = Time::new::<second>(0.0);
+
     // Simulation config for cluster demo
     let config = SimulationConfig {
         time_step: Time::new::<second>(100.),
         length_unit: LengthUnit::Meter,
         mass_unit: MassUnit::Kilogram,
         pixels_per_length: 2.0,
+        display_stats: true,
     };
 
     // Define bounds for cluster initialization
@@ -54,10 +57,23 @@ async fn main() {
             object.draw(&config, None, WHITE);
         }
 
-        // Optional: Draw center of mass
+        // Draw center of mass
         let com = cluster.center_of_mass();
         let screen_pos = Screen::world_to_screen(&com, &config);
         draw_circle(screen_pos.x, screen_pos.y, 5.0, RED);
+
+        // Update and display total passed time
+        passed_time += config.time_step;
+
+        if config.display_stats {
+            Screen::display_stats(
+                &[("time", &(passed_time.value as f32))],
+                simulation::screen::ScreenPosition::TopLeft,
+                None,
+                None,
+                None,
+            );
+        }
 
         next_frame().await;
     }
