@@ -70,18 +70,15 @@ async fn main() {
 
             current.reset_forces();
 
-            // Apply forces from objects before current
-            for other in left.iter() {
+            // Apply forces from objects before and after current
+            for other in left.iter().chain(right.iter()) {
                 current.apply_force(&potential, other.as_ref());
             }
+        }
 
-            // Apply forces from objects after current
-            for other in right.iter() {
-                current.apply_force(&potential, other.as_ref());
-            }
-
-            current.step(Some(&StepType::Verlet), config.time_step);
-            current.draw(&config, None, color);
+        for point in &mut points {
+            point.step(Some(&StepType::Verlet), config.time_step);
+            point.draw(&config, None, color);
         }
 
         next_frame().await;

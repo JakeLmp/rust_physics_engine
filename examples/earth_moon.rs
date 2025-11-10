@@ -40,72 +40,61 @@ async fn main() {
     // Moon's orbital velocity around Earth (approximately 1022 m/s)
     let moon_orbital_velocity = Velocity::new::<meter_per_second>(1022.0);
 
-    let mut points: Vec<Box<dyn PhysicalObject>> = vec![
-        // Earth at origin
-        Box::new(PointMass::new(
-            Vector2D {
-                x: Length::new::<meter>(0.0),
-                y: Length::new::<meter>(0.0),
-            },
-            Vector2D {
-                x: Velocity::new::<meter_per_second>(0.0),
-                y: Velocity::new::<meter_per_second>(0.0),
-            },
-            Vector2D {
-                x: Acceleration::new::<meter_per_second_squared>(0.0),
-                y: Acceleration::new::<meter_per_second_squared>(0.0),
-            },
-            earth_mass,
-            config.time_step,
-        )),
-        // Moon
-        Box::new(PointMass::new(
-            Vector2D {
-                x: earth_moon_distance,
-                y: Length::new::<meter>(0.0),
-            },
-            Vector2D {
-                x: Velocity::new::<meter_per_second>(0.0),
-                y: moon_orbital_velocity,
-            },
-            Vector2D {
-                x: Acceleration::new::<meter_per_second_squared>(0.0),
-                y: Acceleration::new::<meter_per_second_squared>(0.0),
-            },
-            moon_mass,
-            config.time_step,
-        )),
-    ];
+    // Earth at origin
+    let mut earth = PointMass::new(
+        Vector2D {
+            x: Length::new::<meter>(0.0),
+            y: Length::new::<meter>(0.0),
+        },
+        Vector2D {
+            x: Velocity::new::<meter_per_second>(0.0),
+            y: Velocity::new::<meter_per_second>(0.0),
+        },
+        Vector2D {
+            x: Acceleration::new::<meter_per_second_squared>(0.0),
+            y: Acceleration::new::<meter_per_second_squared>(0.0),
+        },
+        earth_mass,
+        config.time_step,
+    );
+
+    // Moon
+    let mut moon = PointMass::new(
+        Vector2D {
+            x: earth_moon_distance,
+            y: Length::new::<meter>(0.0),
+        },
+        Vector2D {
+            x: Velocity::new::<meter_per_second>(0.0),
+            y: moon_orbital_velocity,
+        },
+        Vector2D {
+            x: Acceleration::new::<meter_per_second_squared>(0.0),
+            y: Acceleration::new::<meter_per_second_squared>(0.0),
+        },
+        moon_mass,
+        config.time_step,
+    );
 
     // Newtonian gravity potential
     let potential = Gravity::default();
 
+    // Update algorithm
+    let step_type = StepType::Verlet;
+
     loop {
         clear_background(BLACK);
 
-        for i in 0..points.len() {
-            let (left, right) = points.split_at_mut(i);
-            let (current, right) = right.split_first_mut().unwrap();
+        earth.reset_forces();
+        earth.apply_force(&potential, &moon);
+        moon.reset_forces();
+        moon.apply_force(&potential, &earth);
 
-            current.reset_forces();
+        earth.step(Some(&step_type), config.time_step);
+        moon.step(Some(&step_type), config.time_step);
 
-            // Apply forces from objects before current
-            for other in left.iter() {
-                current.apply_force(&potential, other.as_ref());
-            }
-
-            // Apply forces from objects after current
-            for other in right.iter() {
-                current.apply_force(&potential, other.as_ref());
-            }
-
-            current.step(Some(&StepType::Verlet), config.time_step);
-
-            let color = if i == 0 { BLUE } else { WHITE };
-            current.draw(&config, None, color);
-        }
-
-        // println!();
+        earth.draw(&config, None, BLUE);
+        moon.draw(&config, None, WHITE);
 
         next_frame().await;
     }
