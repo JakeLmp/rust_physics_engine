@@ -1,7 +1,6 @@
 use macroquad::prelude::{Color, Vec2, WHITE, draw_circle, draw_text, screen_height, screen_width};
 use macroquad::text::measure_text;
 
-use uom::si::Quantity;
 use uom::si::f64::Length;
 
 use crate::objects::point_mass::PointMass;
@@ -10,6 +9,7 @@ use crate::simulation::config::SimulationConfig;
 
 pub struct Screen;
 
+#[allow(dead_code)]
 pub enum ScreenPosition {
     Top,
     Bottom,
@@ -63,14 +63,16 @@ impl Screen {
         let font_s = font_size.unwrap_or(20.0);
         let color = text_color.unwrap_or(WHITE);
 
-        let mut x = 0.0;
-        let mut y = 0.0;
+        let x: f32;
+        let y: f32;
 
         match screen_pos {
             ScreenPosition::Top => {
+                x = 0.0;
                 y = pad;
             }
             ScreenPosition::Bottom => {
+                x = 0.0;
                 y = screen_height() - pad - (stats.len() as f32 * line_h);
             }
             ScreenPosition::Left => {

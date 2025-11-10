@@ -84,17 +84,14 @@ impl Cluster {
 
             current.reset_forces();
 
-            // Apply forces from objects before current
-            for other in left.iter() {
+            // Apply forces from objects before and after current
+            for other in left.iter().chain(right.iter()) {
                 current.apply_force(potential, other.as_ref());
             }
+        }
 
-            // Apply forces from objects after current
-            for other in right.iter() {
-                current.apply_force(potential, other.as_ref());
-            }
-
-            current.step(step_type, config.time_step);
+        for object in &mut self.objects {
+            object.step(step_type, config.time_step);
         }
     }
 }
