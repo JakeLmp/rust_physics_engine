@@ -2,8 +2,7 @@ use macroquad::color::Color;
 use uom::si::f64::{Acceleration, Length, Mass, Time, Velocity};
 
 use crate::{
-    objects::point_mass::StepType,
-    physics::{potential::Potential, vector::Vector2D},
+    physics::{potential::Potential, time_integration::StepType, vector::Vector2D},
     simulation::config::SimulationConfig,
 };
 

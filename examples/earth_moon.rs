@@ -1,10 +1,8 @@
 use physics_engine::{
-    objects::{
-        physical_object::PhysicalObject,
-        point_mass::{PointMass, StepType},
-    },
+    objects::{physical_object::PhysicalObject, point_mass::PointMass},
     physics::{
         potential::{Gravity, Potential},
+        time_integration::StepType,
         vector::Vector2D,
     },
     simulation::{

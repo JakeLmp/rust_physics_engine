@@ -1,10 +1,6 @@
 use physics_engine::{
-    objects::{
-        physical_object::PhysicalObject,
-        point_mass::{PointMass, StepType},
-    },
-    physics::potential::LennardJones,
-    physics::vector::Vector2D,
+    objects::{physical_object::PhysicalObject, point_mass::PointMass},
+    physics::{potential::LennardJones, time_integration::StepType, vector::Vector2D},
     simulation::{
         config::SimulationConfig,
         units::{LengthUnit, MassUnit},

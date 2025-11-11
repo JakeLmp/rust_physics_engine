@@ -5,11 +5,8 @@ use uom::si::{
 };
 
 use crate::{
-    objects::{
-        physical_object::PhysicalObject,
-        point_mass::{PointMass, StepType},
-    },
-    physics::{potential::Potential, vector::Vector2D},
+    objects::{physical_object::PhysicalObject, point_mass::PointMass},
+    physics::{potential::Potential, time_integration::StepType, vector::Vector2D},
     simulation::config::SimulationConfig,
 };
 
