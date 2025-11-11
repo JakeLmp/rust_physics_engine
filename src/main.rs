@@ -10,7 +10,6 @@ use uom::si::{
 
 use macroquad::prelude::*;
 
-use objects::point_mass::StepType;
 use physics::{
     cluster::{Cluster, RectangularBounds},
     potential::{Gravity, Potential},
@@ -18,6 +17,8 @@ use physics::{
 use simulation::config::*;
 use simulation::screen::Screen;
 use simulation::units::*;
+
+use crate::physics::time_integration::StepType;
 
 #[macroquad::main("Physics Engine")]
 async fn main() {
