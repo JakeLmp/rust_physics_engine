@@ -1,5 +1,8 @@
 use physics_engine::{
-    objects::point_mass::{PhysicalObject, PointMass, StepType},
+    objects::{
+        physical_object::PhysicalObject,
+        point_mass::{PointMass, StepType},
+    },
     physics::potential::LennardJones,
     physics::vector::Vector2D,
     simulation::{
