@@ -28,10 +28,14 @@ pub struct RectangularBounds {
 impl Cluster {
     #[must_use]
     #[allow(clippy::cast_possible_truncation)]
-    pub fn new(config: &SimulationConfig, position_bounds: &RectangularBounds) -> Self {
-        // Initialize argon atoms
+    pub fn new(
+        config: &SimulationConfig,
+        position_bounds: &RectangularBounds,
+        no_of_objects: u32,
+        mass_of_objects: Mass,
+    ) -> Self {
         let mut objects: Vec<Box<dyn PhysicalObject>> = Vec::new();
-        for _i in 0..100 {
+        for _i in 0..no_of_objects {
             objects.push(Box::new(PointMass::new(
                 Vector2D {
                     x: config.length_unit.new(f64::from(rand::gen_range(
@@ -46,7 +50,7 @@ impl Cluster {
                 // units don't matter here, as long as we're initialising with zero-vector
                 Vector2D::<Velocity>::zero(),
                 Vector2D::<Acceleration>::zero(),
-                config.mass_unit.new(500.),
+                mass_of_objects,
                 config.time_step,
             )));
         }
