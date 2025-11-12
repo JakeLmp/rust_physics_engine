@@ -29,20 +29,20 @@ async fn main() {
         time_step: Time::new::<second>(100.),
         length_unit: LengthUnit::Meter,
         mass_unit: MassUnit::Kilogram,
-        pixels_per_length: 2.0,
+        pixels_per_length: 0.5,
         display_stats: true,
     };
 
     // Define bounds for cluster initialization
     let bounds = RectangularBounds {
-        x1: Length::new::<meter>(-200.0),
-        x2: Length::new::<meter>(200.0),
-        y1: Length::new::<meter>(-100.0),
-        y2: Length::new::<meter>(100.0),
+        x1: Length::new::<meter>(-800.0),
+        x2: Length::new::<meter>(800.0),
+        y1: Length::new::<meter>(-500.0),
+        y2: Length::new::<meter>(500.0),
     };
 
     // Create cluster
-    let mut cluster = Cluster::new(&config, &bounds);
+    let mut cluster = Cluster::new(&config, &bounds, 100, config.mass_unit.new(500.));
 
     // Newtonian gravity potential
     let potential = Gravity::default();
@@ -55,13 +55,17 @@ async fn main() {
 
         // Draw all objects in the cluster
         for object in &cluster.objects {
-            object.draw(&config, None, WHITE);
+            object.draw(
+                &config,
+                Some(5.0 / config.mass_unit.get(object.mass()) as f32),
+                WHITE,
+            );
         }
 
         // Draw center of mass
         let com = cluster.center_of_mass();
         let screen_pos = Screen::world_to_screen(&com, &config);
-        draw_circle(screen_pos.x, screen_pos.y, 5.0, RED);
+        draw_circle(screen_pos.x, screen_pos.y, 2.0, RED);
 
         // Update and display total passed time
         passed_time += config.time_step;
