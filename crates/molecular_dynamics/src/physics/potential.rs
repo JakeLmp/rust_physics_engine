@@ -9,7 +9,8 @@ use uom::si::{
 };
 use uom::typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0};
 
-use crate::{objects::physical_object::PhysicalObject, physics::vector::Vector2D};
+use crate::objects::physical_object::PhysicalObject;
+use physics_core::vector::Vector2D;
 
 #[allow(dead_code)]
 pub trait Potential {

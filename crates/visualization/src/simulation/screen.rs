@@ -1,11 +1,10 @@
-use macroquad::prelude::{Color, Vec2, WHITE, draw_circle, draw_text, screen_height, screen_width};
+use macroquad::prelude::{Vec2, WHITE, draw_text, screen_height, screen_width};
 use macroquad::text::measure_text;
 
 use uom::si::f64::Length;
 
-use crate::objects::point_mass::PointMass;
-use crate::physics::vector::Vector2D;
 use crate::simulation::config::SimulationConfig;
+use physics_core::vector::Vector2D;
 
 pub struct Screen;
 
@@ -33,20 +32,6 @@ impl Screen {
             screen_width() / 2.0 + x as f32,
             screen_height() / 2.0 + y as f32,
         )
-    }
-
-    /// Draw a point as a circle on the screen
-    #[allow(clippy::cast_possible_truncation)]
-    pub fn draw_point(
-        point: &PointMass,
-        config: &SimulationConfig,
-        radius_multiplier: Option<f32>,
-        color: Color,
-    ) {
-        let screen_pos = Self::world_to_screen(&point.pos, config);
-        let radius = config.mass_unit.get(point.mass) as f32 * radius_multiplier.unwrap_or(1.0);
-
-        draw_circle(screen_pos.x, screen_pos.y, radius, color);
     }
 
     /// Display statistics about the sim

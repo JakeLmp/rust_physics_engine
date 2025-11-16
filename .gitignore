@@ -4,3 +4,5 @@
 
 # virtual environment
 /.venv
+
+Cargo.lock

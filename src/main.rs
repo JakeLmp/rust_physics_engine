@@ -1,7 +1,3 @@
-mod objects;
-mod physics;
-mod simulation;
-
 use uom::si::{
     f64::{Length, Time},
     length::meter,
@@ -10,15 +6,14 @@ use uom::si::{
 
 use macroquad::prelude::*;
 
-use physics::{
+use molecular_dynamics::physics::{
     cluster::{Cluster, RectangularBounds},
     potential::{Gravity, Potential},
+    time_integration::StepType,
 };
-use simulation::config::*;
-use simulation::screen::Screen;
-use simulation::units::*;
-
-use crate::physics::time_integration::StepType;
+use visualization::simulation::config::*;
+use visualization::simulation::screen::{Screen, ScreenPosition};
+use visualization::simulation::units::*;
 
 #[macroquad::main("Physics Engine")]
 async fn main() {
@@ -55,11 +50,7 @@ async fn main() {
 
         // Draw all objects in the cluster
         for object in &cluster.objects {
-            object.draw(
-                &config,
-                Some(5.0 / config.mass_unit.get(object.mass()) as f32),
-                WHITE,
-            );
+            object.draw(&config, Some(5.0), WHITE);
         }
 
         // Draw center of mass
@@ -73,7 +64,7 @@ async fn main() {
         if config.display_stats {
             Screen::display_stats(
                 &[("time", &(passed_time.value as f32))],
-                simulation::screen::ScreenPosition::TopRight,
+                ScreenPosition::TopRight,
                 None,
                 None,
                 None,

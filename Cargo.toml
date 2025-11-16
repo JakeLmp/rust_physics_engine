@@ -1,15 +1,19 @@
+[workspace]
+members = [
+    "crates/physics_core",
+    "crates/molecular_dynamics",
+    "crates/visualization",
+]
+resolver = "2"
+
 [package]
 name = "physics_engine"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+physics_core = { path = "crates/physics_core" }
+molecular_dynamics = { path = "crates/molecular_dynamics" }
+visualization = { path = "crates/visualization" }
 macroquad = "0.4.14"
 uom = "0.37.0"
-
-[lib]
-name = "physics_engine"
-path = "src/lib.rs"
-
-[features]
-internal_validation = []

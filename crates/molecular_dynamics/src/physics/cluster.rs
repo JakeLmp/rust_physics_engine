@@ -6,9 +6,10 @@ use uom::si::{
 
 use crate::{
     objects::{physical_object::PhysicalObject, point_mass::PointMass},
-    physics::{potential::Potential, time_integration::StepType, vector::Vector2D},
-    simulation::config::SimulationConfig,
+    physics::{potential::Potential, time_integration::StepType},
 };
+use physics_core::vector::Vector2D;
+use visualization::simulation::config::SimulationConfig;
 
 /// A cluster of objects, e.g. `PointMasses`
 pub struct Cluster {

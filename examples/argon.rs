@@ -1,10 +1,11 @@
-use physics_engine::{
+use molecular_dynamics::{
     objects::{physical_object::PhysicalObject, point_mass::PointMass},
-    physics::{potential::LennardJones, time_integration::StepType, vector::Vector2D},
-    simulation::{
-        config::SimulationConfig,
-        units::{LengthUnit, MassUnit},
-    },
+    physics::{potential::LennardJones, time_integration::StepType},
+};
+use physics_core::vector::Vector2D;
+use visualization::simulation::{
+    config::SimulationConfig,
+    units::{LengthUnit, MassUnit},
 };
 
 use uom::si::{

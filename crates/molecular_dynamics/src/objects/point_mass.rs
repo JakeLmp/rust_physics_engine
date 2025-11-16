@@ -10,10 +10,10 @@ use crate::{
     physics::{
         potential::Potential,
         time_integration::{NaiveStep, StepType, VelocityVerletStep, VerletStep},
-        vector::Vector2D,
     },
-    simulation::{config::SimulationConfig, screen::Screen},
 };
+use physics_core::vector::Vector2D;
+use visualization::simulation::{config::SimulationConfig, screen::Screen};
 
 #[derive(Debug, Clone)]
 pub struct PointMass {
@@ -104,12 +104,9 @@ impl PhysicalObject for PointMass {
     /// Draws a circle to the Screen
     #[allow(clippy::cast_possible_truncation)]
     fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color) {
-        Screen::draw_point(
-            self,
-            config,
-            Some(scale.unwrap_or(15.0 / config.mass_unit.get(self.mass()) as f32)),
-            color,
-        );
+        let screen_pos = Screen::world_to_screen(&self.pos, config);
+        let radius = scale.unwrap_or(15.0 / config.mass_unit.get(self.mass()) as f32);
+        macroquad::prelude::draw_circle(screen_pos.x, screen_pos.y, radius, color);
     }
 }
 
