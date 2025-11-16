@@ -78,7 +78,7 @@ async fn main() {
 
         for point in &mut points {
             point.step(Some(&StepType::Verlet), config.time_step);
-            point.draw(&config, None, color);
+            point.draw(&config, Some(10.), color);
         }
 
         next_frame().await;

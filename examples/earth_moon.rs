@@ -94,8 +94,8 @@ async fn main() {
         earth.step(Some(&step_type), config.time_step);
         moon.step(Some(&step_type), config.time_step);
 
-        earth.draw(&config, None, BLUE);
-        moon.draw(&config, None, WHITE);
+        earth.draw(&config, Some(20.), BLUE);
+        moon.draw(&config, Some(10.), WHITE);
 
         next_frame().await;
     }
