@@ -26,6 +26,7 @@ async fn main() {
     // Simulation config for Argon
     let config = SimulationConfigBuilder::default()
         .time_step(Time::new::<femtosecond>(1.0))
+        .length_unit(LengthUnit::Angstrom)
         .mass_unit(MassUnit::Dalton)
         .pixels_per_length(0.4)
         .time_steps_per_frame(Some(10))
