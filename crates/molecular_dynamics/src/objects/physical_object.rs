@@ -19,6 +19,12 @@ pub trait PhysicalObject {
     fn acc(&self) -> Vector2D<Acceleration>;
     fn mass(&self) -> Mass;
 
+    // Setter methods
+    fn set_pos(&mut self, new_value: Vector2D<Length>);
+    fn set_vel(&mut self, new_value: Vector2D<Velocity>);
+    fn set_acc(&mut self, new_value: Vector2D<Acceleration>);
+    fn set_mass(&mut self, new_value: Mass);
+
     /// Method to draw the object to the Screen
     fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color);
 }

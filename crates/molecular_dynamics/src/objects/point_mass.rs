@@ -101,6 +101,19 @@ impl PhysicalObject for PointMass {
         self.mass
     }
 
+    fn set_pos(&mut self, new_value: Vector2D<Length>) {
+        self.pos = new_value;
+    }
+    fn set_vel(&mut self, new_value: Vector2D<Velocity>) {
+        self.vel = new_value;
+    }
+    fn set_acc(&mut self, new_value: Vector2D<Acceleration>) {
+        self.acc = new_value;
+    }
+    fn set_mass(&mut self, new_value: Mass) {
+        self.mass = new_value;
+    }
+
     /// Draws a circle to the Screen
     #[allow(clippy::cast_possible_truncation)]
     fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color) {

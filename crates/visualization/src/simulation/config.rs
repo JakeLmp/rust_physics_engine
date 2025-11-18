@@ -7,6 +7,9 @@ use crate::simulation::units::{LengthUnit, MassUnit};
 pub struct SimulationConfig {
     /// uom::si::f32::Time object specifying time step between each simulation frame
     pub time_step: Time,
+    /// The number of time steps to take each frame before rendering
+    #[builder(default = None)]
+    pub time_steps_per_frame: Option<u8>,
     /// Length unit used in drawing
     #[builder(default = "LengthUnit::Meter")]
     pub length_unit: LengthUnit,

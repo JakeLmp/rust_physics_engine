@@ -1,7 +1,7 @@
 use uom::si::{
     ISQ, Quantity, SI,
     energy::electronvolt,
-    f64::{Energy, Force, Length, Mass, Ratio, Time},
+    f64::{Acceleration, Energy, Force, Length, Mass, Ratio, Time, Velocity},
     length::{angstrom, meter},
     mass::kilogram,
     ratio::ratio,
@@ -24,6 +24,17 @@ pub trait Potential {
 
     /// Force exerted on object1 by object2
     fn force(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Vector2D<Force>;
+
+    /// Compute pair-wise force from provided arrays
+    fn force_from_arrays(
+        &self,
+        idx1: usize,
+        idx2: usize,
+        pos_arr: &Vec<Vector2D<Length>>,
+        vel_arr: &Vec<Vector2D<Velocity>>,
+        acc_arr: &Vec<Vector2D<Acceleration>>,
+        mass_arr: &Vec<Mass>,
+    ) -> Vector2D<Force>;
 }
 
 // Define the type for G: m³/(kg·s²)
@@ -61,6 +72,23 @@ impl Potential for Gravity {
 
         -r_hat * self.big_g * object1.mass() * object2.mass() / (r_mag * r_mag)
     }
+
+    /// Gravitational force: F = G·m₁·m₂·r̂/r²
+    fn force_from_arrays(
+        &self,
+        idx1: usize,
+        idx2: usize,
+        pos_arr: &Vec<Vector2D<Length>>,
+        _vel_arr: &Vec<Vector2D<Velocity>>,
+        _acc_arr: &Vec<Vector2D<Acceleration>>,
+        mass_arr: &Vec<Mass>,
+    ) -> Vector2D<Force> {
+        let r: Vector2D<Length> = pos_arr[idx1] - pos_arr[idx2];
+        let r_mag: Length = r.mag();
+        let r_hat: Vector2D<Ratio> = r / r_mag;
+
+        -r_hat * self.big_g * mass_arr[idx1] * mass_arr[idx2] / (r_mag * r_mag)
+    }
 }
 
 /// The Lennard-Jones potential, commonly used in molecular dynamics
@@ -92,6 +120,24 @@ impl Potential for LennardJones {
     /// Lennard-Jones force: F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
     fn force(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Vector2D<Force> {
         let r: Vector2D<Length> = object1.pos() - object2.pos();
+        let r_mag: Length = r.mag();
+
+        r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
+            * ((self.sigma / r_mag).powi(P14::new())
+                - Ratio::new::<ratio>(0.5) * (self.sigma / r_mag).powi(P8::new()))
+    }
+
+    /// Lennard-Jones force: F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
+    fn force_from_arrays(
+        &self,
+        idx1: usize,
+        idx2: usize,
+        pos_arr: &Vec<Vector2D<Length>>,
+        _vel_arr: &Vec<Vector2D<Velocity>>,
+        _acc_arr: &Vec<Vector2D<Acceleration>>,
+        _mass_arr: &Vec<Mass>,
+    ) -> Vector2D<Force> {
+        let r: Vector2D<Length> = pos_arr[idx1] - pos_arr[idx2];
         let r_mag: Length = r.mag();
 
         r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
