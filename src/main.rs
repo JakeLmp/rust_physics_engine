@@ -26,8 +26,12 @@ async fn main() {
         .mass_unit(MassUnit::Kilogram)
         .pixels_per_length(0.5)
         .display_stats(true)
+        .init_fullscreen(false)
         .build()
         .unwrap();
+
+    // Run configuration setup
+    config.simulation_setup();
 
     // Define bounds for cluster initialization
     let bounds = RectangularBounds {
@@ -42,8 +46,6 @@ async fn main() {
 
     // Newtonian gravity potential
     let potential = Gravity::default();
-
-    set_fullscreen(config.init_fullscreen);
 
     loop {
         clear_background(BLACK);

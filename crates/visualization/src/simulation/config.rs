@@ -1,7 +1,12 @@
 use derive_builder::Builder;
 use uom::si::f64::Time;
 
-use crate::simulation::units::{LengthUnit, MassUnit};
+use macroquad::prelude::*;
+
+use crate::simulation::{
+    screen::{Screen, ScreenPosition},
+    units::{LengthUnit, MassUnit},
+};
 
 #[derive(Debug, Builder)]
 pub struct SimulationConfig {
@@ -25,4 +30,23 @@ pub struct SimulationConfig {
     /// Whether to display stats
     #[builder(default = false)]
     pub display_stats: bool,
+}
+
+impl SimulationConfig {
+    pub fn simulation_setup(&self) {
+        set_fullscreen(self.init_fullscreen);
+    }
+
+    // pub fn loop_setup(&self) {
+    //     if config.display_stats {
+    //         Screen::display_stats(
+    //             &[("time", &(passed_time.value as f32))],
+    //             ScreenPosition::TopRight,
+    //             None,
+    //             None,
+    //             None,
+    //             None,
+    //         );
+    //     }
+    // }
 }
