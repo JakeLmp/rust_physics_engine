@@ -24,10 +24,11 @@ use macroquad::prelude::*;
 async fn main() {
     // Simulation config for Argon
     let config = SimulationConfigBuilder::default()
-        .time_step(Time::new::<femtosecond>(100.0))
+        .time_step(Time::new::<femtosecond>(1.0))
         .length_unit(LengthUnit::Angstrom)
         .mass_unit(MassUnit::Dalton)
         .pixels_per_length(4.0)
+        .force_softening_epsilon(Some(LengthUnit::Angstrom.new(1e-3)))
         .build()
         .unwrap();
 
@@ -72,7 +73,7 @@ async fn main() {
 
             // Apply forces from objects before and after current
             for other in left.iter().chain(right.iter()) {
-                current.apply_force(&potential, other.as_ref());
+                current.apply_force(&potential, other.as_ref(), &config);
             }
         }
 

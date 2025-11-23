@@ -9,7 +9,12 @@ pub trait PhysicalObject {
     /// Method to reset acceleration before applying forces
     fn reset_forces(&mut self);
     /// Method to apply a force to the object
-    fn apply_force(&mut self, potential: &dyn Potential, other: &dyn PhysicalObject);
+    fn apply_force(
+        &mut self,
+        potential: &dyn Potential,
+        other: &dyn PhysicalObject,
+        config: &SimulationConfig,
+    );
     /// Method to apply a time step to the object
     fn step(&mut self, step_type: Option<&StepType>, time_step: Time);
 
