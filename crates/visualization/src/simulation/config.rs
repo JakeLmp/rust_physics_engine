@@ -1,5 +1,5 @@
 use derive_builder::Builder;
-use uom::si::f64::{Length, Time};
+use uom::si::f64::{Force, Length, Time};
 
 use crate::simulation::units::{LengthUnit, MassUnit};
 
@@ -28,7 +28,11 @@ pub struct SimulationConfig {
     #[builder(default = false)]
     pub display_stats: bool,
 
-    /// If given, use a force-softening minimum distance.
+    /// If given, use a force-softening minimum distance
     #[builder(default = None)]
     pub force_softening_epsilon: Option<Length>,
+
+    /// If given, use a maximum allowed force
+    #[builder(default = None)]
+    pub force_cap: Option<Force>,
 }

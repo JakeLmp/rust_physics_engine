@@ -74,7 +74,16 @@ impl Potential for Gravity {
         };
         let r_hat: Vector2D<Ratio> = r / r_mag;
 
-        -r_hat * self.big_g * object1.mass() * object2.mass() / (r_mag * r_mag)
+        let force: Vector2D<Force> =
+            -r_hat * self.big_g * object1.mass() * object2.mass() / (r_mag * r_mag);
+
+        if let Some(cap) = config.force_cap {
+            if force.mag() > cap {
+                return force * (cap / force.mag());
+            }
+        }
+
+        force
     }
 }
 
@@ -118,8 +127,17 @@ impl Potential for LennardJones {
             r.mag()
         };
 
-        r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
+        let force: Vector2D<Force> = r * (Ratio::new::<ratio>(48.) * self.epsilon)
+            / (self.sigma * self.sigma)
             * ((self.sigma / r_mag).powi(P14::new())
-                - Ratio::new::<ratio>(0.5) * (self.sigma / r_mag).powi(P8::new()))
+                - Ratio::new::<ratio>(0.5) * (self.sigma / r_mag).powi(P8::new()));
+
+        if let Some(cap) = config.force_cap {
+            if force.mag() > cap {
+                return force * (cap / force.mag());
+            }
+        }
+
+        force
     }
 }
