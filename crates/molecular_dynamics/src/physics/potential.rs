@@ -8,6 +8,7 @@ use uom::si::{
     time::second,
 };
 use uom::typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0};
+use visualization::simulation::config::SimulationConfig;
 
 use crate::objects::physical_object::PhysicalObject;
 use physics_core::vector::Vector2D;
@@ -23,7 +24,12 @@ pub trait Potential {
     fn energy(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Energy;
 
     /// Force exerted on object1 by object2
-    fn force(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Vector2D<Force>;
+    fn force(
+        &self,
+        object1: &dyn PhysicalObject,
+        object2: &dyn PhysicalObject,
+        config: &SimulationConfig,
+    ) -> Vector2D<Force>;
 }
 
 // Define the type for G: m³/(kg·s²)
@@ -54,9 +60,18 @@ impl Potential for Gravity {
     }
 
     /// Gravitational force: F = G·m₁·m₂·r̂/r²
-    fn force(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Vector2D<Force> {
+    fn force(
+        &self,
+        object1: &dyn PhysicalObject,
+        object2: &dyn PhysicalObject,
+        config: &SimulationConfig,
+    ) -> Vector2D<Force> {
         let r: Vector2D<Length> = object1.pos() - object2.pos();
-        let r_mag: Length = r.mag();
+        let r_mag = if let Some(epsilon) = config.force_softening_epsilon {
+            r.mag() + epsilon
+        } else {
+            r.mag()
+        };
         let r_hat: Vector2D<Ratio> = r / r_mag;
 
         -r_hat * self.big_g * object1.mass() * object2.mass() / (r_mag * r_mag)
@@ -90,9 +105,18 @@ impl Potential for LennardJones {
     }
 
     /// Lennard-Jones force: F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
-    fn force(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Vector2D<Force> {
+    fn force(
+        &self,
+        object1: &dyn PhysicalObject,
+        object2: &dyn PhysicalObject,
+        config: &SimulationConfig,
+    ) -> Vector2D<Force> {
         let r: Vector2D<Length> = object1.pos() - object2.pos();
-        let r_mag: Length = r.mag();
+        let r_mag = if let Some(epsilon) = config.force_softening_epsilon {
+            r.mag() + epsilon
+        } else {
+            r.mag()
+        };
 
         r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
             * ((self.sigma / r_mag).powi(P14::new())

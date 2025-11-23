@@ -91,7 +91,7 @@ impl Cluster {
 
             // Apply forces from objects before and after current
             for other in left.iter().chain(right.iter()) {
-                current.apply_force(potential, other.as_ref());
+                current.apply_force(potential, other.as_ref(), config);
             }
         }
 

@@ -1,5 +1,5 @@
 use derive_builder::Builder;
-use uom::si::f64::Time;
+use uom::si::f64::{Length, Time};
 
 use crate::simulation::units::{LengthUnit, MassUnit};
 
@@ -7,19 +7,28 @@ use crate::simulation::units::{LengthUnit, MassUnit};
 pub struct SimulationConfig {
     /// uom::si::f32::Time object specifying time step between each simulation frame
     pub time_step: Time,
+
     /// Length unit used in drawing
     #[builder(default = "LengthUnit::Meter")]
     pub length_unit: LengthUnit,
+
     /// Mass unit used in drawing
     #[builder(default = "MassUnit::Kilogram")]
     pub mass_unit: MassUnit,
+
     /// Number of pixels per unit length
     #[builder(default = 1.0)]
     pub pixels_per_length: f64,
+
     /// Start simulation fullscreen
     #[builder(default = false)]
     pub init_fullscreen: bool,
+
     /// Whether to display stats
     #[builder(default = false)]
     pub display_stats: bool,
+
+    /// If given, use a force-softening minimum distance.
+    #[builder(default = None)]
+    pub force_softening_epsilon: Option<Length>,
 }
