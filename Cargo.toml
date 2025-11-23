@@ -3,6 +3,7 @@ members = [
     "crates/physics_core",
     "crates/molecular_dynamics",
     "crates/visualization",
+    "crates/cfd_solver",
 ]
 resolver = "2"
 
@@ -15,5 +16,6 @@ edition = "2024"
 physics_core = { path = "crates/physics_core" }
 molecular_dynamics = { path = "crates/molecular_dynamics" }
 visualization = { path = "crates/visualization" }
+cfd_solver = { path = "crates/cfd_solver" }
 macroquad = "0.4.14"
 uom = "0.37.0"
