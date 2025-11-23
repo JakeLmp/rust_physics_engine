@@ -13,6 +13,30 @@ use visualization::simulation::config::SimulationConfig;
 use crate::objects::physical_object::PhysicalObject;
 use physics_core::vector::Vector2D;
 
+// ----- HELPER FUNCTIONS -----
+
+/// If configured, apply force softening to a distance magnitude
+fn soften_distance(r_mag: Length, config: &SimulationConfig) -> Length {
+    if let Some(epsilon) = config.force_softening_epsilon {
+        r_mag + epsilon
+    } else {
+        r_mag
+    }
+}
+
+/// If configured, apply force cap
+fn cap_force(force: Vector2D<Force>, config: &SimulationConfig) -> Vector2D<Force> {
+    if let Some(cap) = config.force_cap {
+        let mag = force.mag();
+        if mag > cap {
+            return force * (cap / mag);
+        }
+    }
+    force
+}
+
+// ----- TRAIT DEFINITION -----
+
 #[allow(dead_code)]
 pub trait Potential {
     /// Returns a new potential struct with default parameter values
@@ -31,6 +55,8 @@ pub trait Potential {
         config: &SimulationConfig,
     ) -> Vector2D<Force>;
 }
+
+// ----- GRAVITY POTENTIAL -----
 
 // Define the type for G: m³/(kg·s²)
 pub type GravitationalParameter = Quantity<
@@ -67,25 +93,17 @@ impl Potential for Gravity {
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
         let r: Vector2D<Length> = object1.pos() - object2.pos();
-        let r_mag = if let Some(epsilon) = config.force_softening_epsilon {
-            r.mag() + epsilon
-        } else {
-            r.mag()
-        };
+        let r_mag = soften_distance(r.mag(), config);
         let r_hat: Vector2D<Ratio> = r / r_mag;
 
         let force: Vector2D<Force> =
             -r_hat * self.big_g * object1.mass() * object2.mass() / (r_mag * r_mag);
 
-        if let Some(cap) = config.force_cap {
-            if force.mag() > cap {
-                return force * (cap / force.mag());
-            }
-        }
-
-        force
+        cap_force(force, config)
     }
 }
+
+// ----- LENNARD-JONES POTENTIAL -----
 
 /// The Lennard-Jones potential, commonly used in molecular dynamics
 /// Typical value examples
@@ -121,23 +139,13 @@ impl Potential for LennardJones {
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
         let r: Vector2D<Length> = object1.pos() - object2.pos();
-        let r_mag = if let Some(epsilon) = config.force_softening_epsilon {
-            r.mag() + epsilon
-        } else {
-            r.mag()
-        };
+        let r_mag = soften_distance(r.mag(), config);
 
         let force: Vector2D<Force> = r * (Ratio::new::<ratio>(48.) * self.epsilon)
             / (self.sigma * self.sigma)
             * ((self.sigma / r_mag).powi(P14::new())
                 - Ratio::new::<ratio>(0.5) * (self.sigma / r_mag).powi(P8::new()));
 
-        if let Some(cap) = config.force_cap {
-            if force.mag() > cap {
-                return force * (cap / force.mag());
-            }
-        }
-
-        force
+        cap_force(force, config)
     }
 }
