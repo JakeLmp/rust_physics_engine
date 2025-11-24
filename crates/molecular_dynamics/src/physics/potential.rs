@@ -64,6 +64,7 @@ pub trait Potential {
         vel_arr: &Vec<Vector2D<Velocity>>,
         acc_arr: &Vec<Vector2D<Acceleration>>,
         mass_arr: &Vec<Mass>,
+        config: &SimulationConfig,
     ) -> Vector2D<Force>;
 }
 
@@ -122,12 +123,15 @@ impl Potential for Gravity {
         _vel_arr: &Vec<Vector2D<Velocity>>,
         _acc_arr: &Vec<Vector2D<Acceleration>>,
         mass_arr: &Vec<Mass>,
+        config: &SimulationConfig,
     ) -> Vector2D<Force> {
         let r: Vector2D<Length> = pos_arr[idx1] - pos_arr[idx2];
-        let r_mag: Length = r.mag();
+        let r_mag: Length = soften_distance(r.mag(), config);
         let r_hat: Vector2D<Ratio> = r / r_mag;
 
-        -r_hat * self.big_g * mass_arr[idx1] * mass_arr[idx2] / (r_mag * r_mag)
+        let force = -r_hat * self.big_g * mass_arr[idx1] * mass_arr[idx2] / (r_mag * r_mag);
+
+        cap_force(force, config)
     }
 }
 
@@ -186,12 +190,15 @@ impl Potential for LennardJones {
         _vel_arr: &Vec<Vector2D<Velocity>>,
         _acc_arr: &Vec<Vector2D<Acceleration>>,
         _mass_arr: &Vec<Mass>,
+        config: &SimulationConfig,
     ) -> Vector2D<Force> {
         let r: Vector2D<Length> = pos_arr[idx1] - pos_arr[idx2];
-        let r_mag: Length = r.mag();
+        let r_mag: Length = soften_distance(r.mag(), config);
 
-        r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
+        let force = r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
             * ((self.sigma / r_mag).powi(P14::new())
-                - Ratio::new::<ratio>(0.5) * (self.sigma / r_mag).powi(P8::new()))
+                - Ratio::new::<ratio>(0.5) * (self.sigma / r_mag).powi(P8::new()));
+
+        cap_force(force, config)
     }
 }

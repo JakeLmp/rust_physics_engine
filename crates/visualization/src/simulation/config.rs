@@ -4,7 +4,7 @@ use uom::si::f64::{Force, Length, Time};
 use macroquad::prelude::*;
 
 use crate::simulation::{
-    screen::{Screen, ScreenPosition},
+    // screen::{Screen, ScreenPosition},
     units::{LengthUnit, MassUnit},
 };
 

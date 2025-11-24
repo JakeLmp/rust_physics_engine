@@ -78,6 +78,7 @@ impl SimulationHandler {
                         &self.velocities,
                         &self.accelerations,
                         &self.masses,
+                        config,
                     );
                     self.accelerations[i] += force / self.masses[i];
                     self.accelerations[j] -= force / self.masses[j];
