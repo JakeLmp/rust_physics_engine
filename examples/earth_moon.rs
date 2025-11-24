@@ -87,9 +87,9 @@ async fn main() {
         clear_background(BLACK);
 
         earth.reset_forces();
-        earth.apply_force(&potential, &moon);
+        earth.apply_force(&potential, &moon, &config);
         moon.reset_forces();
-        moon.apply_force(&potential, &earth);
+        moon.apply_force(&potential, &earth, &config);
 
         earth.step(Some(&step_type), config.time_step);
         moon.step(Some(&step_type), config.time_step);

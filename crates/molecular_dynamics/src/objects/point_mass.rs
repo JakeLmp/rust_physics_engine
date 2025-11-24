@@ -67,8 +67,13 @@ impl PhysicalObject for PointMass {
     }
 
     /// Apply potential resulting from other object
-    fn apply_force(&mut self, potential: &dyn Potential, other: &dyn PhysicalObject) {
-        self.acc += potential.force(self, other) / self.mass;
+    fn apply_force(
+        &mut self,
+        potential: &dyn Potential,
+        other: &dyn PhysicalObject,
+        config: &SimulationConfig,
+    ) {
+        self.acc += potential.force(self, other, config) / self.mass;
     }
 
     /// Update position parameters using different methods
