@@ -17,6 +17,3 @@ molecular_dynamics = { path = "crates/molecular_dynamics" }
 visualization = { path = "crates/visualization" }
 macroquad = "0.4.14"
 uom = "0.37.0"
-
-[features]
-internal_validation = []
