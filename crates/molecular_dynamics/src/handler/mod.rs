@@ -6,12 +6,12 @@ use uom::si::{
 use visualization::simulation::config::SimulationConfig;
 
 use crate::{
-    objects::physical_object::PhysicalObject,
     physics::{potential::Potential, time_integration::StepType},
+    point_mass::PointMass,
 };
 
 pub struct SimulationHandler {
-    pub objects: Vec<Box<dyn PhysicalObject>>,
+    pub points: Vec<Box<PointMass>>,
 
     positions: Vec<Vector2D<Length>>,
     velocities: Vec<Vector2D<Velocity>>,
@@ -23,10 +23,10 @@ pub struct SimulationHandler {
 }
 
 impl SimulationHandler {
-    pub fn new(objects: Vec<Box<dyn PhysicalObject>>) -> Self {
-        let len = objects.len();
+    pub fn new(points: Vec<Box<PointMass>>) -> Self {
+        let len = points.len();
         let mut handler = Self {
-            objects,
+            points,
             positions: vec![Vector2D::<Length>::zero(); len],
             velocities: vec![Vector2D::<Velocity>::zero(); len],
             accelerations: vec![Vector2D::<Acceleration>::zero(); len],
@@ -35,25 +35,25 @@ impl SimulationHandler {
             last_velocities: vec![Vector2D::<Velocity>::zero(); len],
         };
 
-        handler.sync_from_objects();
+        handler.sync_from_points();
         handler
     }
 
-    pub fn sync_from_objects(&mut self) {
-        for (i, obj) in self.objects.iter().enumerate() {
-            self.positions[i] = obj.pos();
-            self.velocities[i] = obj.vel();
-            self.accelerations[i] = obj.acc();
-            self.masses[i] = obj.mass();
+    pub fn sync_from_points(&mut self) {
+        for (i, point) in self.points.iter().enumerate() {
+            self.positions[i] = point.pos();
+            self.velocities[i] = point.vel();
+            self.accelerations[i] = point.acc();
+            self.masses[i] = point.mass();
         }
     }
 
-    pub fn sync_to_objects(&mut self) {
-        for (i, obj) in self.objects.iter_mut().enumerate() {
-            obj.set_pos(self.positions[i]);
-            obj.set_vel(self.velocities[i]);
-            obj.set_acc(self.accelerations[i]);
-            obj.set_mass(self.masses[i]);
+    pub fn sync_to_points(&mut self) {
+        for (i, point) in self.points.iter_mut().enumerate() {
+            point.set_pos(self.positions[i]);
+            point.set_vel(self.velocities[i]);
+            point.set_acc(self.accelerations[i]);
+            point.set_mass(self.masses[i]);
         }
     }
 

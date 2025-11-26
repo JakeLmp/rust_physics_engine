@@ -10,7 +10,7 @@ use uom::si::{
 use uom::typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0};
 use visualization::simulation::config::SimulationConfig;
 
-use crate::objects::physical_object::PhysicalObject;
+use crate::point_mass::PointMass;
 use physics_core::vector::Vector2D;
 
 // ----- HELPER FUNCTIONS -----
@@ -45,13 +45,13 @@ pub trait Potential {
         Self: Sized;
 
     /// Potential energy between two points
-    fn energy(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Energy;
+    fn energy(&self, point1: &PointMass, point2: &PointMass) -> Energy;
 
-    /// Force exerted on object1 by object2
+    /// Force exerted on point1 by point2
     fn force(
         &self,
-        object1: &dyn PhysicalObject,
-        object2: &dyn PhysicalObject,
+        point1: &PointMass,
+        point2: &PointMass,
         config: &SimulationConfig,
     ) -> Vector2D<Force>;
 
@@ -92,24 +92,24 @@ impl Potential for Gravity {
     }
 
     /// Gravitational potential energy: U = -G·m₁·m₂/r
-    fn energy(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Energy {
-        let r = object2.pos() - object1.pos();
-        -self.big_g * object1.mass() * object2.mass() / r.mag()
+    fn energy(&self, point1: &PointMass, point2: &PointMass) -> Energy {
+        let r = point2.pos() - point1.pos();
+        -self.big_g * point1.mass() * point2.mass() / r.mag()
     }
 
     /// Gravitational force: F = G·m₁·m₂·r̂/r²
     fn force(
         &self,
-        object1: &dyn PhysicalObject,
-        object2: &dyn PhysicalObject,
+        point1: &PointMass,
+        point2: &PointMass,
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
-        let r: Vector2D<Length> = object1.pos() - object2.pos();
+        let r: Vector2D<Length> = point1.pos() - point2.pos();
         let r_mag = soften_distance(r.mag(), config);
         let r_hat: Vector2D<Ratio> = r / r_mag;
 
         let force: Vector2D<Force> =
-            -r_hat * self.big_g * object1.mass() * object2.mass() / (r_mag * r_mag);
+            -r_hat * self.big_g * point1.mass() * point2.mass() / (r_mag * r_mag);
 
         cap_force(force, config)
     }
@@ -156,8 +156,8 @@ impl Potential for LennardJones {
     }
 
     /// Lennard-Jones potential energy: U = 4ε[(σ/r)¹² - (σ/r)⁶]
-    fn energy(&self, object1: &dyn PhysicalObject, object2: &dyn PhysicalObject) -> Energy {
-        let r: Vector2D<Length> = object2.pos() - object1.pos();
+    fn energy(&self, point1: &PointMass, point2: &PointMass) -> Energy {
+        let r: Vector2D<Length> = point2.pos() - point1.pos();
         Ratio::new::<ratio>(4.0)
             * self.epsilon
             * ((self.sigma / r.mag()).powi(P12::new()) - (self.sigma / r.mag()).powi(P6::new()))
@@ -166,11 +166,11 @@ impl Potential for LennardJones {
     /// Lennard-Jones force: F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
     fn force(
         &self,
-        object1: &dyn PhysicalObject,
-        object2: &dyn PhysicalObject,
+        point1: &PointMass,
+        point2: &PointMass,
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
-        let r: Vector2D<Length> = object1.pos() - object2.pos();
+        let r: Vector2D<Length> = point1.pos() - point2.pos();
         let r_mag = soften_distance(r.mag(), config);
 
         let force: Vector2D<Force> = r * (Ratio::new::<ratio>(48.) * self.epsilon)

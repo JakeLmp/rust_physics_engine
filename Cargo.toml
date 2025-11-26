@@ -2,7 +2,7 @@
 members = [
     "crates/physics_core",
     "crates/molecular_dynamics",
-    "crates/visualization",
+    "crates/visualization", "crates/engine",
 ]
 resolver = "2"
 

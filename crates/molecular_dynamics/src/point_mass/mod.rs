@@ -5,12 +5,9 @@ use uom::si::{
     ratio::ratio,
 };
 
-use crate::{
-    objects::physical_object::PhysicalObject,
-    physics::{
-        potential::Potential,
-        time_integration::{NaiveStep, StepType, VelocityVerletStep, VerletStep},
-    },
+use crate::physics::{
+    potential::Potential,
+    time_integration::{NaiveStep, StepType, VelocityVerletStep, VerletStep},
 };
 use physics_core::vector::Vector2D;
 use visualization::simulation::{config::SimulationConfig, screen::Screen};
@@ -60,24 +57,24 @@ impl PointMass {
 }
 
 #[allow(dead_code)]
-impl PhysicalObject for PointMass {
+impl PointMass {
     /// Reset force
-    fn reset_forces(&mut self) {
+    pub fn reset_forces(&mut self) {
         self.acc = Vector2D::<Acceleration>::zero();
     }
 
     /// Apply potential resulting from other object
-    fn apply_force(
+    pub fn apply_force(
         &mut self,
         potential: &dyn Potential,
-        other: &dyn PhysicalObject,
+        other: &PointMass,
         config: &SimulationConfig,
     ) {
         self.acc += potential.force(self, other, config) / self.mass;
     }
 
     /// Update position parameters using different methods
-    fn step(&mut self, step_type: Option<&StepType>, time_step: Time) {
+    pub fn step(&mut self, step_type: Option<&StepType>, time_step: Time) {
         let step_type = step_type.unwrap_or(&StepType::Naive);
 
         match step_type {
@@ -93,35 +90,35 @@ impl PhysicalObject for PointMass {
         }
     }
 
-    fn pos(&self) -> Vector2D<Length> {
+    pub fn pos(&self) -> Vector2D<Length> {
         self.pos
     }
-    fn vel(&self) -> Vector2D<Velocity> {
+    pub fn vel(&self) -> Vector2D<Velocity> {
         self.vel
     }
-    fn acc(&self) -> Vector2D<Acceleration> {
+    pub fn acc(&self) -> Vector2D<Acceleration> {
         self.acc
     }
-    fn mass(&self) -> Mass {
+    pub fn mass(&self) -> Mass {
         self.mass
     }
 
-    fn set_pos(&mut self, new_value: Vector2D<Length>) {
+    pub fn set_pos(&mut self, new_value: Vector2D<Length>) {
         self.pos = new_value;
     }
-    fn set_vel(&mut self, new_value: Vector2D<Velocity>) {
+    pub fn set_vel(&mut self, new_value: Vector2D<Velocity>) {
         self.vel = new_value;
     }
-    fn set_acc(&mut self, new_value: Vector2D<Acceleration>) {
+    pub fn set_acc(&mut self, new_value: Vector2D<Acceleration>) {
         self.acc = new_value;
     }
-    fn set_mass(&mut self, new_value: Mass) {
+    pub fn set_mass(&mut self, new_value: Mass) {
         self.mass = new_value;
     }
 
     /// Draws a circle to the Screen
     #[allow(clippy::cast_possible_truncation)]
-    fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color) {
+    pub fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color) {
         let screen_pos = Screen::world_to_screen(&self.pos, config);
         let radius = scale.unwrap_or(15.0 / config.mass_unit.get(self.mass()) as f32);
         macroquad::prelude::draw_circle(screen_pos.x, screen_pos.y, radius, color);
