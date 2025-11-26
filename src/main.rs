@@ -1,84 +1,90 @@
-// use uom::si::{
-//     f64::{Length, Time},
-//     length::meter,
-//     time::second,
-// };
+use molecular_dynamics::{
+    handler::SimulationHandler,
+    physics::{potential::LennardJones, time_integration::StepType},
+    point_mass::PointMass,
+};
+use physics_core::vector::Vector2D;
+use visualization::simulation::{
+    config::SimulationConfigBuilder,
+    units::{LengthUnit, MassUnit},
+};
 
-// use macroquad::prelude::*;
+use uom::si::{
+    acceleration::meter_per_second_squared,
+    energy::electronvolt,
+    f64::{Acceleration, Energy, Length, Mass, Time, Velocity},
+    length::angstrom,
+    mass::dalton,
+    time::femtosecond,
+    velocity::atomic_unit_of_velocity,
+};
 
-// use molecular_dynamics::physics::{
-//     cluster::{Cluster, RectangularBounds},
-//     potential::{Gravity, Potential},
-//     time_integration::StepType,
-// };
-// use visualization::simulation::config::*;
-// use visualization::simulation::screen::{Screen, ScreenPosition};
-// use visualization::simulation::units::*;
+use macroquad::prelude::*;
 
-// #[macroquad::main("Physics Engine")]
-// async fn main() {
-//     let mut passed_time = Time::new::<second>(0.0);
+#[macroquad::main("Argon Gas Large - SimulationHandler")]
+async fn main() {
+    // Simulation config for Argon
+    let config = SimulationConfigBuilder::default()
+        .time_step(Time::new::<femtosecond>(1.0))
+        .length_unit(LengthUnit::Angstrom)
+        .mass_unit(MassUnit::Dalton)
+        .pixels_per_length(0.4)
+        .time_steps_per_frame(Some(10))
+        .build()
+        .unwrap();
 
-//     // Simulation config for cluster demo
-//     let config = SimulationConfigBuilder::default()
-//         .time_step(Time::new::<second>(100.))
-//         .length_unit(LengthUnit::Meter)
-//         .mass_unit(MassUnit::Kilogram)
-//         .pixels_per_length(0.5)
-//         .display_stats(true)
-//         .init_fullscreen(false)
-//         .build()
-//         .unwrap();
+    // Initialize argon atoms
+    let max_bound = 1000.0;
+    let mut points: Vec<Box<PointMass>> = Vec::new();
+    for _i in 0..1000 {
+        points.push(Box::new(PointMass::new(
+            Vector2D {
+                x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
+                y: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
+            },
+            Vector2D {
+                x: Velocity::new::<atomic_unit_of_velocity>(0.0),
+                y: Velocity::new::<atomic_unit_of_velocity>(0.0),
+            },
+            Vector2D {
+                x: Acceleration::new::<meter_per_second_squared>(0.0),
+                y: Acceleration::new::<meter_per_second_squared>(0.0),
+            },
+            Mass::new::<dalton>(39.948),
+            config.time_step,
+        )));
+    }
 
-//     // Run configuration setup
-//     config.simulation_setup();
+    // Create simulation handler
+    let mut handler = SimulationHandler::new(points);
 
-//     // Define bounds for cluster initialization
-//     let bounds = RectangularBounds {
-//         x1: Length::new::<meter>(-800.0),
-//         x2: Length::new::<meter>(800.0),
-//         y1: Length::new::<meter>(-500.0),
-//         y2: Length::new::<meter>(500.0),
-//     };
+    // Lennard-Jones potential for Argon
+    let potential = LennardJones {
+        epsilon: Energy::new::<electronvolt>(0.0104),
+        sigma: Length::new::<angstrom>(3.4),
+    };
 
-//     // Create cluster
-//     let mut cluster = Cluster::new(&config, &bounds, 100, config.mass_unit.new(500.));
+    let color = WHITE;
 
-//     // Newtonian gravity potential
-//     let potential = Gravity::default();
+    loop {
+        // Run multiple physics steps
+        handler.step_physics(
+            &config,
+            &potential,
+            config.time_step,
+            StepType::VelocityVerlet,
+        );
 
-//     loop {
-//         clear_background(BLACK);
+        clear_background(BLACK);
 
-//         // Step the cluster simulation
-//         cluster.step(&config, &potential, Some(&StepType::Verlet));
+        // Sync back to objects for rendering
+        handler.sync_to_points();
 
-//         // Draw all objects in the cluster
-//         for object in &cluster.objects {
-//             object.draw(&config, Some(5.0), WHITE);
-//         }
+        // Draw all objects
+        for obj in &handler.points {
+            obj.draw(&config, Some(1.), color);
+        }
 
-//         // Draw center of mass
-//         let com = cluster.center_of_mass();
-//         let screen_pos = Screen::world_to_screen(&com, &config);
-//         draw_circle(screen_pos.x, screen_pos.y, 2.0, RED);
-
-//         // Update and display total passed time
-//         passed_time += config.time_step;
-
-//         if config.display_stats {
-//             Screen::display_stats(
-//                 &[("time", &(passed_time.value as f32))],
-//                 ScreenPosition::TopRight,
-//                 None,
-//                 None,
-//                 None,
-//                 None,
-//             );
-//         }
-
-//         next_frame().await;
-//     }
-// }
-
-fn main() {}
+        next_frame().await;
+    }
+}
