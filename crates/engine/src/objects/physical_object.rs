@@ -1,7 +1,7 @@
 use macroquad::color::Color;
 use uom::si::f64::{Acceleration, Length, Mass, Time, Velocity};
 
-use crate::physics::{potential::Potential, time_integration::StepType};
+use molecular_dynamics::physics::{potential::Potential, time_integration::StepType};
 use physics_core::vector::Vector2D;
 use visualization::simulation::config::SimulationConfig;
 

@@ -4,3 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+uom = "0.37.0"
+macroquad = "0.4.14"
+molecular_dynamics = { path = "../molecular_dynamics" }
+physics_core = { path = "../physics_core" }
+visualization = { path = "../visualization" }
