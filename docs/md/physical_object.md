@@ -1,60 +1,82 @@
 # PhysicalObject Trait
 
-The `PhysicalObject` trait defines the interface for any object that participates in the physics simulation. Objects implementing this trait can interact via forces, update their state, and be rendered.
+The `PhysicalObject` trait defines a common interface for heterogeneous 2D physics objects. This trait enables collections of different object types (circles, rectangles, etc.) to interact within the same simulation.
 
-## Trait Methods
+## Purpose
 
-- `reset_forces(&mut self)`: Reset the object's accumulated forces (typically sets acceleration to zero).
-- `apply_force(&mut self, potential: &dyn Potential, other: &dyn PhysicalObject)`: Apply a force from another object using a specified potential.
-- `step(&mut self, step_type: Option<&StepType>, time_step: Time)`: Advance the object's state by one time step using the chosen integration method.
-- `pos(&self)`, `vel(&self)`, `acc(&self)`, `mass(&self)`: Getters for position, velocity, acceleration, and mass.
-- `draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color)`: Render the object.
+This trait is designed for **2D physics** scenarios where you need:
+- Different types of objects (circles, rectangles, polygons, etc.)
+- Heterogeneous collections (e.g., `Vec<Box<dyn PhysicalObject>>`)
+- Polymorphic behavior (different draw methods, collision responses)
 
-Any struct implementing `PhysicalObject` can be used in clusters and simulations.
+> **Note:** For molecular dynamics simulations with homogeneous particles,
+> use `PointMass` directly without this trait (see [`point_mass.md`](point_mass.md)).
 
----
-
-# PointMass Implementation
-
-The `PointMass` struct is a simple implementation of `PhysicalObject`, representing a simple point-like object with position, velocity, acceleration, and mass.
-
-## Example
+## Trait Definition
 
 ```rust
-use uom::si::{
-    acceleration::meter_per_second_squared,
-    f32::{Acceleration, Length, Mass, Velocity},
-    length::meter,
-    mass::kilogram,
-    velocity::meter_per_second,
-};
-use physics::vector::Vector2D;
-use objects::point_mass::{PointMass, StepType, PhysicalObject};
+pub trait PhysicalObject {
+    // Force management
+    fn reset_forces(&mut self);
+    fn apply_force(
+        &mut self,
+        potential: &dyn Potential,
+        other: &dyn PhysicalObject,
+        config: &SimulationConfig,
+    );
 
-let mut point = PointMass::new(
-    Vector2D {
-        x: Length::new::<meter>(0.0),
-        y: Length::new::<meter>(0.0),
-    },
-    Vector2D {
-        x: Velocity::new::<meter_per_second>(1.0),
-        y: Velocity::new::<meter_per_second>(0.5),
-    },
-    Vector2D {
-        x: Acceleration::new::<meter_per_second_squared>(0.0),
-        y: Acceleration::new::<meter_per_second_squared>(-9.81),
-    },
-    Mass::new::<kilogram>(1.5),
-);
+    // Time integration
+    fn step(&mut self, step_type: Option<&StepType>, time_step: Time);
 
-// Advance simulation
-point.step(Some(&StepType::Naive), time_step);
+    // Getters
+    fn pos(&self) -> Vector2D<Length>;
+    fn vel(&self) -> Vector2D<Velocity>;
+    fn acc(&self) -> Vector2D<Acceleration>;
+    fn mass(&self) -> Mass;
 
-// Draw the point mass
-point.draw(&config, Some(5.0), RED);
+    // Setters
+    fn set_pos(&mut self, new_value: Vector2D<Length>);
+    fn set_vel(&mut self, new_value: Vector2D<Velocity>);
+    fn set_acc(&mut self, new_value: Vector2D<Acceleration>);
+    fn set_mass(&mut self, new_value: Mass);
+
+    // Rendering
+    fn draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color);
+}
 ```
 
-## See also:
+## Example: Heterogeneous Game Physics
 
-- [`Cluster`](cluster.md)
-- [`Vector2D`](vector.md)
+```rust
+use engine::objects::physical_object::PhysicalObject;
+use molecular_dynamics::physics::potential::Gravity;
+
+// Collection of different object types
+let mut objects: Vec<Box<dyn PhysicalObject>> = vec![
+    Box::new(Circle::new(...)),
+    Box::new(Rectangle::new(...)),
+    Box::new(Polygon::new(...)),
+];
+
+// Update all objects polymorphically
+for obj in &mut objects {
+    obj.reset_forces();
+}
+
+for i in 0..objects.len() {
+    for j in (i+1)..objects.len() {
+        // Apply forces between different object types
+        objects[i].apply_force(&gravity, objects[j].as_ref(), &config);
+    }
+}
+
+for obj in &mut objects {
+    obj.step(Some(&StepType::VelocityVerlet), time_step);
+    obj.draw(&config, None, RED);
+}
+```
+
+## See Also
+
+- [`PointMass`](point_mass.md) - The concrete particle type for MD simulations
+- [`Vector2D`](vector.md) - Vector mathematics for physics

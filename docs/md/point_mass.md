@@ -1,23 +1,22 @@
 # PointMass
 
-The `PointMass` struct represents a single point-like object with mass, position, velocity, and acceleration. It is the basic building block for physics simulations in this engine.
-
-> **Note:**
-> `PointMass` implements the [`PhysicalObject`](physical_object.md) trait, which provides a common interface for simulation objects.
-> This includes methods for resetting forces, applying forces, stepping the simulation, accessing position/velocity/acceleration/mass, and drawing.
+The `PointMass` struct represents a single particle with mass, position, velocity, and acceleration. It is the fundamental building block for molecular dynamics (MD) simulations.
 
 ## Initialization
 
 ```rust
 use uom::si::{
     acceleration::meter_per_second_squared,
-    f32::{Acceleration, Length, Mass, Velocity},
+    f64::{Acceleration, Length, Mass, Time, Velocity},
     length::meter,
     mass::kilogram,
     velocity::meter_per_second,
+    time::second,
 };
-use physics::vector::Vector2D;
-use objects::point_mass::{PointMass, StepType};
+use physics_core::vector::Vector2D;
+use molecular_dynamics::point_mass::PointMass;
+
+let time_step = Time::new::<second>(0.01);
 
 let mut point = PointMass::new(
     Vector2D {
@@ -33,36 +32,58 @@ let mut point = PointMass::new(
         y: Acceleration::new::<meter_per_second_squared>(-9.81),
     },
     Mass::new::<kilogram>(1.5),
+    time_step,
 );
 ```
 
-## Stepping
+## Force Application
+
+Particles interact via potentials (e.g., Lennard-Jones for molecular dynamics):
+
+```rust
+use molecular_dynamics::physics::potential::LennardJones;
+
+// Reset accumulated forces
+point.reset_forces();
+
+// Apply pairwise forces from other particles
+for other in &other_particles {
+    point.apply_force(&lennard_jones, other, &config);
+}
+```
+
+## Time Integration
 
 Advance the simulation using different integration methods:
 
 ```rust
-for i in 1..=3 {
-    point.step(Some(&StepType::Naive), time_step);
-    println!(
-        "Step {}: pos = ({:.2} m, {:.2} m), vel = ({:.2} m/s, {:.2} m/s)",
-        i,
-        point.pos.x.get::<meter>(),
-        point.pos.y.get::<meter>(),
-        point.vel.x.get::<meter_per_second>(),
-        point.vel.y.get::<meter_per_second>()
-    );
-}
+use molecular_dynamics::physics::time_integration::StepType;
+
+// Naive Euler method (simple, less accurate)
+point.step(Some(&StepType::Naive), time_step);
+
+// Verlet method (better energy conservation)
+point.step(Some(&StepType::Verlet), time_step);
+
+// Velocity Verlet method (most common in MD)
+point.step(Some(&StepType::VelocityVerlet), time_step);
+
+// Default to Naive if not specified
+point.step(None, time_step);
 ```
 
-## Drawing
+## Visualization
 
-Draw the point mass as a circle on the screen:
+Draw the particle as a circle:
 
 ```rust
 use macroquad::prelude::RED;
-use simulation::config::SimulationConfig;
+use visualization::simulation::config::SimulationConfig;
 
-// Draw the point with a custom scale and color
+// Draw with automatic scaling based on mass
+point.draw(&config, None, RED);
+
+// Or with custom radius
 point.draw(&config, Some(5.0), RED);
 ```
 
@@ -72,20 +93,29 @@ point.draw(&config, Some(5.0), RED);
 - `vel`: Velocity (`Vector2D<Velocity>`)
 - `acc`: Acceleration (`Vector2D<Acceleration>`)
 - `mass`: Mass (`Mass`)
+- `last_pos`: Previous position (used by Verlet integrators)
+- `last_vel`: Previous velocity (used by Velocity Verlet)
 
 ## Methods
 
-- `new(...)`: Create a new `PointMass`
-- `step(...)`: Advance the state using a chosen integration method
-- `draw(...)`: Render the point mass to the screen
-- Trait methods from `PhysicalObject`:
-  - `reset_forces(&mut self)`
-  - `apply_force(&mut self, potential: &dyn Potential, other: &dyn PhysicalObject)`
-  - `step(&mut self, step_type: Option<&StepType>, time_step: Time)`
-  - `pos(&self)`, `vel(&self)`, `acc(&self)`, `mass(&self)`
-  - `draw(&self, config: &SimulationConfig, scale: Option<f32>, color: Color)`
+### Construction
+- `new(pos, vel, acc, mass, time_step)` - Create a new particle
+
+### Force Application
+- `reset_forces(&mut self)` - Zero out acceleration
+- `apply_force(&mut self, potential, other, config)` - Apply force from another particle
+
+### Time Integration
+- `step(&mut self, step_type, time_step)` - Advance state by one time step
+
+### Accessors
+- `pos(&self)`, `vel(&self)`, `acc(&self)`, `mass(&self)` - Getters
+- `set_pos(&mut self, ...)`, `set_vel(...)`, `set_acc(...)`, `set_mass(...)` - Setters
+
+### Visualization
+- `draw(&self, config, scale, color)` - Render to screen
 
 ## See Also
 
-- [`Cluster`](cluster.md)
-- [`Vector2D`](vector.md)
+- [`Vector2D`](vector.md) - The 2D vector type used for physics calculations
+- [`PhysicalObject`](physical_object.md) - Game physics trait (in `engine` crate)
