@@ -54,4 +54,7 @@ point.step(Some(&StepType::Naive), time_step);
 point.draw(&config, Some(5.0), RED);
 ```
 
-See also: [`Cluster`](cluster.md), [`Vector2D`](vector.md)
+## See also:
+
+- [`Cluster`](cluster.md)
+- [`Vector2D`](vector.md)

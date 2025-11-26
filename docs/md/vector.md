@@ -215,4 +215,7 @@ println!("Magnitude of result: {} m", result.mag().get::<meter>());
 - Unary negation: `-vector` reverses direction.
 - Compatible with any unit type supported by `uom`.
 
-See also: [`PointMass`](point_mass.md), [`Cluster`](cluster.md)
+## See also
+
+- [`PointMass`](point_mass.md)
+- [`Cluster`](cluster.md)
