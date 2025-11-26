@@ -1,9 +1,9 @@
 use molecular_dynamics::{
-    objects::{physical_object::PhysicalObject, point_mass::PointMass},
     physics::{
         potential::{Gravity, Potential},
         time_integration::StepType,
     },
+    point_mass::PointMass,
 };
 use physics_core::vector::Vector2D;
 use visualization::simulation::{

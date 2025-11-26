@@ -1,6 +1,6 @@
 use molecular_dynamics::{
-    objects::{physical_object::PhysicalObject, point_mass::PointMass},
     physics::{potential::LennardJones, time_integration::StepType},
+    point_mass::PointMass,
 };
 use physics_core::vector::Vector2D;
 use visualization::simulation::{
@@ -34,7 +34,7 @@ async fn main() {
 
     // Initialize argon atoms
     let max_bound = 100.0;
-    let mut points: Vec<Box<dyn PhysicalObject>> = Vec::new();
+    let mut points: Vec<Box<PointMass>> = Vec::new();
     for _i in 0..100 {
         points.push(Box::new(PointMass::new(
             Vector2D {
