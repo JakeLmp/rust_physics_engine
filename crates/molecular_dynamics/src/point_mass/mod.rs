@@ -1,3 +1,5 @@
+pub mod cluster;
+
 use macroquad::color::Color;
 use std::fmt;
 use uom::si::{

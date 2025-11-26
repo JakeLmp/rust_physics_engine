@@ -8,7 +8,7 @@ use crate::point_mass::PointMass;
 use physics_core::vector::Vector2D;
 use visualization::simulation::config::SimulationConfig;
 
-/// A cluster of points, e.g. `PointMasses`
+/// A cluster of `PointMass`es
 pub struct Cluster {
     /// The points in question
     pub points: Vec<Box<PointMass>>,
