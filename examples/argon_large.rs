@@ -35,9 +35,9 @@ async fn main() {
 
     // Initialize argon atoms
     let max_bound = 1000.0;
-    let mut points: Vec<Box<PointMass>> = Vec::new();
+    let mut points: Vec<PointMass> = Vec::new();
     for _i in 0..1000 {
-        points.push(Box::new(PointMass::new(
+        points.push(PointMass::new(
             Vector2D {
                 x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
                 y: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
@@ -52,7 +52,7 @@ async fn main() {
             },
             Mass::new::<dalton>(39.948),
             config.time_step,
-        )));
+        ));
     }
 
     // Create simulation handler

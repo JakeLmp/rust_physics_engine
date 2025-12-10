@@ -11,7 +11,7 @@ use visualization::simulation::config::SimulationConfig;
 /// A cluster of `PointMass`es
 pub struct Cluster {
     /// The points in question
-    pub points: Vec<Box<PointMass>>,
+    pub points: Vec<PointMass>,
 }
 
 #[derive(Debug)]
@@ -31,9 +31,9 @@ impl Cluster {
         no_of_points: u32,
         mass_of_points: Mass,
     ) -> Self {
-        let mut points: Vec<Box<PointMass>> = Vec::new();
+        let mut points: Vec<PointMass> = Vec::new();
         for _i in 0..no_of_points {
-            points.push(Box::new(PointMass::new(
+            points.push(PointMass::new(
                 Vector2D {
                     x: config.length_unit.new(f64::from(rand::gen_range(
                         config.length_unit.get(position_bounds.x1) as f32,
@@ -49,7 +49,7 @@ impl Cluster {
                 Vector2D::<Acceleration>::zero(),
                 mass_of_points,
                 config.time_step,
-            )));
+            ));
         }
 
         Self { points }

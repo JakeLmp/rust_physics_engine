@@ -11,7 +11,7 @@ use crate::{
 };
 
 pub struct SimulationHandler {
-    pub points: Vec<Box<PointMass>>,
+    pub points: Vec<PointMass>,
 
     positions: Vec<Vector2D<Length>>,
     velocities: Vec<Vector2D<Velocity>>,
@@ -23,7 +23,7 @@ pub struct SimulationHandler {
 }
 
 impl SimulationHandler {
-    pub fn new(points: Vec<Box<PointMass>>) -> Self {
+    pub fn new(points: Vec<PointMass>) -> Self {
         let len = points.len();
         let mut handler = Self {
             points,

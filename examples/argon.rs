@@ -34,9 +34,9 @@ async fn main() {
 
     // Initialize argon atoms
     let max_bound = 100.0;
-    let mut points: Vec<Box<PointMass>> = Vec::new();
+    let mut points: Vec<PointMass> = Vec::new();
     for _i in 0..100 {
-        points.push(Box::new(PointMass::new(
+        points.push(PointMass::new(
             Vector2D {
                 x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
                 y: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
@@ -51,7 +51,7 @@ async fn main() {
             },
             Mass::new::<dalton>(39.948),
             config.time_step,
-        )));
+        ));
     }
 
     // Lennard-Jones potential for Argon
@@ -73,7 +73,7 @@ async fn main() {
 
             // Apply forces from objects before and after current
             for other in left.iter().chain(right.iter()) {
-                current.apply_force(&potential, other.as_ref(), &config);
+                current.apply_force(&potential, other, &config);
             }
         }
 
