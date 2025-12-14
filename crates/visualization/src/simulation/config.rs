@@ -1,4 +1,5 @@
 use derive_builder::Builder;
+use physics_core::vector::Vector2D;
 use uom::si::f64::{Force, Length, Time};
 
 use macroquad::prelude::*;
@@ -44,6 +45,10 @@ pub struct SimulationConfig {
     /// If given, use a maximum allowed force
     #[builder(default = None)]
     pub force_cap: Option<Force>,
+
+    /// Boundary type
+    #[builder(default = BoundaryType::Infinite)]
+    pub boundary_type: BoundaryType,
 }
 
 impl SimulationConfig {
@@ -63,4 +68,29 @@ impl SimulationConfig {
     //         );
     //     }
     // }
+}
+
+/// `BoundaryType` options. The boundary size
+#[derive(Debug, Clone)]
+pub enum BoundaryType {
+    /// No boundaries
+    Infinite,
+    /// Periodic boundaries. Size given as half-width from origin.
+    Periodic(Vector2D<Length>),
+    /// Elastic collision with non-moving boundaries. Size given as half-width from origin.
+    Elastic(Vector2D<Length>),
+    /// Object is removed from system after passing boundary. Size given as half-width from origin.
+    Open(Vector2D<Length>),
+}
+
+impl BoundaryType {
+    /// Get the bounds `Vector2D<Length>`, if applicable
+    pub fn bounds(&self) -> Option<Vector2D<Length>> {
+        match self {
+            BoundaryType::Infinite => None,
+            BoundaryType::Periodic(bounds) => Some(*bounds),
+            BoundaryType::Elastic(bounds) => Some(*bounds),
+            BoundaryType::Open(bounds) => Some(*bounds),
+        }
+    }
 }

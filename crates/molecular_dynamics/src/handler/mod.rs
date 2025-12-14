@@ -3,7 +3,7 @@ use uom::si::{
     f64::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
 };
-use visualization::simulation::config::SimulationConfig;
+use visualization::simulation::config::{BoundaryType, SimulationConfig};
 
 use crate::{
     physics::{potential::Potential, time_integration::StepType},
@@ -86,7 +86,19 @@ impl SimulationHandler {
             }
 
             for i in 0..self.positions.len() {
-                self.step_movement(i, time_step, &movement_step_type)
+                self.step_movement(i, time_step, &movement_step_type);
+
+                // Apply Periodic and Elastic boundary conditions
+                match &config.boundary_type {
+                    BoundaryType::Periodic(bounds) => self.apply_periodic_boundary(i, bounds),
+                    BoundaryType::Elastic(bounds) => self.apply_elastic_boundary(i, bounds),
+                    _ => {}
+                }
+            }
+
+            // If open boundaries, remove outside
+            if let BoundaryType::Periodic(bounds) = config.boundary_type {
+                self.apply_open_boundary(&bounds);
             }
         }
     }
@@ -130,5 +142,61 @@ impl SimulationHandler {
 
         self.last_positions[idx] = current_pos;
         self.last_velocities[idx] = current_vel;
+    }
+
+    fn apply_periodic_boundary(&mut self, idx: usize, bounds: &Vector2D<Length>) {
+        self.positions[idx].x = Self::wrap_coordinate(self.positions[idx].x, bounds.x);
+        self.positions[idx].y = Self::wrap_coordinate(self.positions[idx].y, bounds.y);
+    }
+
+    fn wrap_coordinate(pos: Length, bound: Length) -> Length {
+        let double_bound = bound * Ratio::new::<ratio>(2.0);
+        let shifted = pos + bound;
+
+        let r = shifted / double_bound;
+        let floored = r.value.floor();
+        let wrapped = shifted - Ratio::new::<ratio>(floored) * double_bound;
+
+        wrapped - bound
+    }
+
+    fn apply_elastic_boundary(&mut self, idx: usize, bounds: &Vector2D<Length>) {
+        if self.positions[idx].x > bounds.x {
+            self.positions[idx].x = bounds.x;
+            self.velocities[idx].x = -self.velocities[idx].x;
+        } else if self.positions[idx].x < -bounds.x {
+            self.positions[idx].x = -bounds.x;
+            self.velocities[idx].x = -self.velocities[idx].x;
+        }
+
+        if self.positions[idx].y > bounds.y {
+            self.positions[idx].y = bounds.y;
+            self.velocities[idx].y = -self.velocities[idx].y;
+        } else if self.positions[idx].y < -bounds.y {
+            self.positions[idx].y = -bounds.y;
+            self.velocities[idx].y = -self.velocities[idx].y;
+        }
+    }
+
+    fn apply_open_boundary(&mut self, bounds: &Vector2D<Length>) {
+        let mut i = 0;
+        while i < self.positions.len() {
+            if self.is_outside_boundary(i, bounds) {
+                self.positions.swap_remove(i);
+                self.velocities.swap_remove(i);
+                self.accelerations.swap_remove(i);
+                self.masses.swap_remove(i);
+                self.last_positions.swap_remove(i);
+                self.last_velocities.swap_remove(i);
+                self.points.swap_remove(i);
+                // Don't increment i, check the swapped element
+            } else {
+                i += 1;
+            }
+        }
+    }
+
+    fn is_outside_boundary(&self, idx: usize, bounds: &Vector2D<Length>) -> bool {
+        self.positions[idx].x.abs() > bounds.x || self.positions[idx].y.abs() > bounds.y
     }
 }
