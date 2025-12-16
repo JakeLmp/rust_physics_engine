@@ -37,6 +37,7 @@ async fn main() {
         }))
         .pair_cutoff_radius(Some(Length::new::<angstrom>(max_bound)))
         .display_stats(true)
+        .display_boundary(true)
         .build()
         .unwrap();
 
@@ -109,6 +110,9 @@ async fn main() {
                 None,
             );
         }
+
+        // Draw boundaries
+        Screen::draw_boundary(&config);
 
         next_frame().await;
     }

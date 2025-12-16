@@ -11,12 +11,9 @@ use crate::simulation::{
 
 #[derive(Debug, Builder)]
 pub struct SimulationConfig {
+    // ===== Units =====
     /// uom::si::f32::Time object specifying time step between each simulation frame
     pub time_step: Time,
-
-    /// The number of time steps to take each frame before rendering
-    #[builder(default = None)]
-    pub time_steps_per_frame: Option<u8>,
 
     /// Length unit used in drawing
     #[builder(default = "LengthUnit::Meter")]
@@ -26,10 +23,16 @@ pub struct SimulationConfig {
     #[builder(default = "MassUnit::Kilogram")]
     pub mass_unit: MassUnit,
 
+    // ===== World-to-screen setup =====
+    /// The number of time steps to take each frame before rendering
+    #[builder(default = None)]
+    pub time_steps_per_frame: Option<u8>,
+
     /// Number of pixels per unit length
     #[builder(default = 1.0)]
     pub pixels_per_length: f64,
 
+    // ===== Visualisation options =====
     /// Start simulation fullscreen
     #[builder(default = false)]
     pub init_fullscreen: bool,
@@ -38,6 +41,11 @@ pub struct SimulationConfig {
     #[builder(default = false)]
     pub display_stats: bool,
 
+    /// Whether to show the boundary of the simulation box
+    #[builder(default = false)]
+    pub display_boundary: bool,
+
+    // ===== Simulation options =====
     /// If given, use a force-softening minimum distance
     #[builder(default = None)]
     pub force_softening_epsilon: Option<Length>,
