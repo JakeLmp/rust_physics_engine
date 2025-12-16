@@ -14,7 +14,7 @@ use uom::si::{
     velocity::atomic_unit_of_velocity,
 };
 use visualization::simulation::{
-    config::{BoundaryType, SimulationConfigBuilder},
+    config::{BoundaryKind, SimulationConfigBuilder},
     screen::{Screen, ScreenPosition},
     units::{LengthUnit, MassUnit},
 };
@@ -31,7 +31,7 @@ async fn main() {
         .mass_unit(MassUnit::Dalton)
         .pixels_per_length(5.)
         .time_steps_per_frame(Some(100))
-        .boundary_type(BoundaryType::Elastic(Vector2D {
+        .boundary_type(BoundaryKind::Elastic(Vector2D {
             x: Length::new::<angstrom>(max_bound),
             y: Length::new::<angstrom>(max_bound),
         }))

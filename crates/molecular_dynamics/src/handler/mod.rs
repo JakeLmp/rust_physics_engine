@@ -3,7 +3,7 @@ use uom::si::{
     f64::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
 };
-use visualization::simulation::config::{BoundaryType, SimulationConfig};
+use visualization::simulation::config::{BoundaryKind, SimulationConfig};
 
 use crate::{
     physics::{potential::Potential, time_integration::StepType},
@@ -92,8 +92,8 @@ impl SimulationHandler {
 
                 // Apply Periodic and Elastic boundary conditions
                 match &config.boundary_type {
-                    BoundaryType::Periodic(bounds) => self.apply_periodic_boundary(i, bounds),
-                    BoundaryType::Elastic(bounds) => self.apply_elastic_boundary(i, bounds),
+                    BoundaryKind::Periodic(bounds) => self.apply_periodic_boundary(i, bounds),
+                    BoundaryKind::Elastic(bounds) => self.apply_elastic_boundary(i, bounds),
                     _ => {}
                 }
             }
@@ -129,7 +129,7 @@ impl SimulationHandler {
             }
 
             // If open boundaries, remove outside
-            if let BoundaryType::Periodic(bounds) = config.boundary_type {
+            if let BoundaryKind::Periodic(bounds) = config.boundary_type {
                 self.apply_open_boundary(&bounds);
             }
         }

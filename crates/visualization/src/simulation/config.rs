@@ -55,13 +55,17 @@ pub struct SimulationConfig {
     pub force_cap: Option<Force>,
 
     /// Boundary type
-    #[builder(default = BoundaryType::Infinite)]
-    pub boundary_type: BoundaryType,
+    #[builder(default = BoundaryKind::Infinite)]
+    pub boundary_type: BoundaryKind,
 
     /// Pairwise interaction cutoff radius `r_c`.
     /// Pair forces where `r > r_c` are skipped
     #[builder(default = None)]
     pub pair_cutoff_radius: Option<Length>,
+
+    /// Type of parallelism to use, if available.
+    #[builder(default = ParallelComputationKind::SingleThread)]
+    pub parallel_computation_kind: ParallelComputationKind,
 }
 
 impl SimulationConfig {
@@ -83,27 +87,38 @@ impl SimulationConfig {
     // }
 }
 
-/// `BoundaryType` options. The boundary size
+/// `BoundaryType` options. The boundary size is given as half-width from the origin.
 #[derive(Debug, Clone)]
-pub enum BoundaryType {
+pub enum BoundaryKind {
     /// No boundaries
     Infinite,
-    /// Periodic boundaries. Size given as half-width from origin.
+    /// Periodic boundaries.
     Periodic(Vector2D<Length>),
-    /// Elastic collision with non-moving boundaries. Size given as half-width from origin.
+    /// Elastic collision with non-moving boundaries.
     Elastic(Vector2D<Length>),
-    /// Object is removed from system after passing boundary. Size given as half-width from origin.
+    /// Object is removed from system after passing boundary.
     Open(Vector2D<Length>),
 }
 
-impl BoundaryType {
+impl BoundaryKind {
     /// Get the bounds `Vector2D<Length>`, if applicable
     pub fn bounds(&self) -> Option<Vector2D<Length>> {
         match self {
-            BoundaryType::Infinite => None,
-            BoundaryType::Periodic(bounds) => Some(*bounds),
-            BoundaryType::Elastic(bounds) => Some(*bounds),
-            BoundaryType::Open(bounds) => Some(*bounds),
+            BoundaryKind::Infinite => None,
+            BoundaryKind::Periodic(bounds) => Some(*bounds),
+            BoundaryKind::Elastic(bounds) => Some(*bounds),
+            BoundaryKind::Open(bounds) => Some(*bounds),
         }
     }
+}
+
+/// Options for parallelism.
+#[derive(Debug, Clone)]
+pub enum ParallelComputationKind {
+    /// Single thread, no parallelism
+    SingleThread,
+    /// CPU multithreaded
+    CPUMultiThread,
+    // GPU multithreaded
+    // GPUMultiThread,
 }

@@ -11,7 +11,7 @@ use uom::{
     },
     typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0},
 };
-use visualization::simulation::config::{BoundaryType, SimulationConfig};
+use visualization::simulation::config::{BoundaryKind, SimulationConfig};
 
 use crate::point_mass::PointMass;
 use physics_core::vector::Vector2D;
@@ -52,7 +52,7 @@ fn periodic_minimum_image_displacement(
     mut dr: Vector2D<Length>,
     config: &SimulationConfig,
 ) -> Vector2D<Length> {
-    let BoundaryType::Periodic(bounds) = &config.boundary_type else {
+    let BoundaryKind::Periodic(bounds) = &config.boundary_type else {
         return dr;
     };
 
