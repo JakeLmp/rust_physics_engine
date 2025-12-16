@@ -12,7 +12,7 @@ use crate::simulation::{
 #[derive(Debug, Builder)]
 pub struct SimulationConfig {
     // ===== Units =====
-    /// uom::si::f32::Time object specifying time step between each simulation frame
+    /// Simulation time step
     pub time_step: Time,
 
     /// Length unit used in drawing

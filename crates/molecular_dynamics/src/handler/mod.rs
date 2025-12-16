@@ -65,6 +65,7 @@ impl SimulationHandler {
         movement_step_type: StepType,
     ) {
         for _ in 0..config.time_steps_per_frame.unwrap_or(1) {
+            // Calculate forces and accelerations at current positions
             for acc in &mut self.accelerations {
                 *acc = Vector2D::<Acceleration>::zero();
             }
@@ -85,6 +86,7 @@ impl SimulationHandler {
                 }
             }
 
+            // Update positions and velocities
             for i in 0..self.positions.len() {
                 self.step_movement(i, time_step, &movement_step_type);
 
@@ -93,6 +95,36 @@ impl SimulationHandler {
                     BoundaryType::Periodic(bounds) => self.apply_periodic_boundary(i, bounds),
                     BoundaryType::Elastic(bounds) => self.apply_elastic_boundary(i, bounds),
                     _ => {}
+                }
+            }
+
+            // For Velocity Verlet: recalculate accelerations at NEW positions
+            // to complete the second half-step
+            if matches!(movement_step_type, StepType::VelocityVerlet) {
+                for acc in &mut self.accelerations {
+                    *acc = Vector2D::<Acceleration>::zero();
+                }
+
+                for i in 0..self.accelerations.len() {
+                    for j in (i + 1)..self.accelerations.len() {
+                        let force = potential.force_from_arrays(
+                            i,
+                            j,
+                            &self.positions,
+                            &self.velocities,
+                            &self.accelerations,
+                            &self.masses,
+                            config,
+                        );
+                        self.accelerations[i] += force / self.masses[i];
+                        self.accelerations[j] -= force / self.masses[j];
+                    }
+                }
+
+                // Complete the second velocity half-step
+                for i in 0..self.velocities.len() {
+                    self.velocities[i] +=
+                        (time_step / Ratio::new::<ratio>(2.0)) * self.accelerations[i];
                 }
             }
 
@@ -134,11 +166,10 @@ impl SimulationHandler {
         let current_pos = self.positions[idx];
         let current_vel = self.velocities[idx];
 
-        self.positions[idx] += time_step * self.velocities[idx]
-            + (time_step / Ratio::new::<ratio>(2.0)) * (time_step * self.accelerations[idx]);
+        self.velocities[idx] += (time_step / Ratio::new::<ratio>(2.0)) * self.accelerations[idx];
+        self.positions[idx] += time_step * self.velocities[idx];
 
-        self.velocities[idx] += (time_step / Ratio::new::<ratio>(2.0))
-            * (Ratio::new::<ratio>(2.0) * self.accelerations[idx]);
+        // Note: second velocity half-step done in step_physics after recalculating forces
 
         self.last_positions[idx] = current_pos;
         self.last_velocities[idx] = current_vel;

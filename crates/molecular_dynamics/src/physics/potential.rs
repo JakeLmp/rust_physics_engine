@@ -73,7 +73,6 @@ fn outside_cutoff(r_mag: Length, config: &SimulationConfig) -> bool {
 
 // ----- TRAIT DEFINITION -----
 
-#[allow(dead_code)]
 pub trait Potential {
     /// Returns a new potential struct with default parameter values
     fn default() -> Self
@@ -114,6 +113,11 @@ pub type GravitationalParameter = Quantity<
 >;
 
 /// Newtonian Gravity potential.
+///
+/// U = -G·m₁·m₂/r
+///
+/// F = G·m₁·m₂·r̂/r²
+///
 /// Typical value for the Gravitational Constant is G = 6.67430×10⁻¹¹ m³·kg⁻¹·s⁻²
 pub struct Gravity {
     pub big_g: GravitationalParameter,
@@ -185,7 +189,12 @@ impl Potential for Gravity {
 
 // ----- LENNARD-JONES POTENTIAL -----
 
-/// The Lennard-Jones potential, commonly used in molecular dynamics
+/// The Lennard-Jones potential, commonly used in molecular dynamics:
+///
+/// U = 4ε[(σ/r)¹² - (σ/r)⁶]
+///
+/// F = (48ε/σ²)·r·[(σ/r)¹⁴ - 0.5(σ/r)⁸]
+///
 /// Typical value examples
 /// Xenon: ε = 0.0184 eV, σ = 4.10 Å
 /// Argon: ε = 0.0104 eV (or `ε/k_B` = 119.8 K), σ = 3.40 Å

@@ -24,14 +24,14 @@ use macroquad::prelude::*;
 #[macroquad::main("Argon Gas Large - SimulationHandler")]
 async fn main() {
     // Simulation config for Argon
-    let max_bound = 1000.0;
+    let max_bound = 100.0;
     let config = SimulationConfigBuilder::default()
-        .time_step(Time::new::<femtosecond>(1.0))
+        .time_step(Time::new::<femtosecond>(0.5))
         .length_unit(LengthUnit::Angstrom)
         .mass_unit(MassUnit::Dalton)
-        .pixels_per_length(0.4)
-        .time_steps_per_frame(Some(25))
-        .boundary_type(BoundaryType::Periodic(Vector2D {
+        .pixels_per_length(5.)
+        .time_steps_per_frame(Some(100))
+        .boundary_type(BoundaryType::Elastic(Vector2D {
             x: Length::new::<angstrom>(max_bound),
             y: Length::new::<angstrom>(max_bound),
         }))
@@ -45,7 +45,7 @@ async fn main() {
 
     // Initialize argon atoms
     let mut points: Vec<PointMass> = Vec::new();
-    for _i in 0..750 {
+    for _i in 0..80 {
         points.push(PointMass::new(
             Vector2D {
                 x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
@@ -94,7 +94,7 @@ async fn main() {
 
         // Draw all objects
         for obj in &handler.points {
-            obj.draw(&config, Some(1.), color);
+            obj.draw(&config, Some(10.), color);
         }
 
         // Display stats
