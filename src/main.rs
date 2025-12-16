@@ -4,11 +4,6 @@ use molecular_dynamics::{
     point_mass::PointMass,
 };
 use physics_core::vector::Vector2D;
-use visualization::simulation::{
-    config::SimulationConfigBuilder,
-    units::{LengthUnit, MassUnit},
-};
-
 use uom::si::{
     acceleration::meter_per_second_squared,
     energy::electronvolt,
@@ -18,33 +13,46 @@ use uom::si::{
     time::femtosecond,
     velocity::atomic_unit_of_velocity,
 };
+use visualization::simulation::{
+    config::{BoundaryType, SimulationConfigBuilder},
+    screen::{Screen, ScreenPosition},
+    units::{LengthUnit, MassUnit},
+};
 
 use macroquad::prelude::*;
 
 #[macroquad::main("Argon Gas Large - SimulationHandler")]
 async fn main() {
     // Simulation config for Argon
+    let max_bound = 1000.0;
     let config = SimulationConfigBuilder::default()
         .time_step(Time::new::<femtosecond>(1.0))
         .length_unit(LengthUnit::Angstrom)
         .mass_unit(MassUnit::Dalton)
         .pixels_per_length(0.4)
-        .time_steps_per_frame(Some(10))
+        .time_steps_per_frame(Some(25))
+        .boundary_type(BoundaryType::Periodic(Vector2D {
+            x: Length::new::<angstrom>(max_bound),
+            y: Length::new::<angstrom>(max_bound),
+        }))
+        .pair_cutoff_radius(Some(Length::new::<angstrom>(max_bound)))
+        .display_stats(true)
         .build()
         .unwrap();
 
+    let max_vel = 0.0;
+
     // Initialize argon atoms
-    let max_bound = 1000.0;
     let mut points: Vec<PointMass> = Vec::new();
-    for _i in 0..1000 {
+    for _i in 0..750 {
         points.push(PointMass::new(
             Vector2D {
                 x: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
                 y: Length::new::<angstrom>(rand::gen_range(-max_bound, max_bound)),
             },
             Vector2D {
-                x: Velocity::new::<atomic_unit_of_velocity>(0.0),
-                y: Velocity::new::<atomic_unit_of_velocity>(0.0),
+                x: Velocity::new::<atomic_unit_of_velocity>(rand::gen_range(-max_vel, max_vel)),
+                y: Velocity::new::<atomic_unit_of_velocity>(rand::gen_range(-max_vel, max_vel)),
             },
             Vector2D {
                 x: Acceleration::new::<meter_per_second_squared>(0.0),
@@ -65,6 +73,7 @@ async fn main() {
     };
 
     let color = WHITE;
+    let mut elapsed_time = Time::new::<femtosecond>(0.0);
 
     loop {
         // Run multiple physics steps
@@ -75,6 +84,8 @@ async fn main() {
             StepType::VelocityVerlet,
         );
 
+        elapsed_time += config.time_step * config.time_steps_per_frame.unwrap_or(1) as f64;
+
         clear_background(BLACK);
 
         // Sync back to objects for rendering
@@ -83,6 +94,20 @@ async fn main() {
         // Draw all objects
         for obj in &handler.points {
             obj.draw(&config, Some(1.), color);
+        }
+
+        // Display stats
+        if config.display_stats {
+            let time_fs = elapsed_time.get::<femtosecond>() as f32;
+            let particles = handler.points.len() as f32;
+            Screen::display_stats(
+                &[("Time (fs)", &time_fs), ("Particles", &particles)],
+                ScreenPosition::TopLeft,
+                None,
+                None,
+                None,
+                None,
+            );
         }
 
         next_frame().await;

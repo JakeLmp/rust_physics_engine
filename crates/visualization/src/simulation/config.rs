@@ -49,6 +49,11 @@ pub struct SimulationConfig {
     /// Boundary type
     #[builder(default = BoundaryType::Infinite)]
     pub boundary_type: BoundaryType,
+
+    /// Pairwise interaction cutoff radius `r_c`.
+    /// Pair forces where `r > r_c` are skipped
+    #[builder(default = None)]
+    pub pair_cutoff_radius: Option<Length>,
 }
 
 impl SimulationConfig {

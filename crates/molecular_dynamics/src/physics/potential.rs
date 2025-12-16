@@ -1,14 +1,17 @@
-use uom::si::{
-    ISQ, Quantity, SI,
-    energy::electronvolt,
-    f64::{Acceleration, Energy, Force, Length, Mass, Ratio, Time, Velocity},
-    length::{angstrom, meter},
-    mass::kilogram,
-    ratio::ratio,
-    time::second,
+use uom::{
+    ConstZero,
+    si::{
+        ISQ, Quantity, SI,
+        energy::electronvolt,
+        f64::{Acceleration, Energy, Force, Length, Mass, Ratio, Time, Velocity},
+        length::{angstrom, meter},
+        mass::kilogram,
+        ratio::ratio,
+        time::second,
+    },
+    typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0},
 };
-use uom::typenum::{N1, N2, P2, P3, P6, P8, P12, P14, Z0};
-use visualization::simulation::config::SimulationConfig;
+use visualization::simulation::config::{BoundaryType, SimulationConfig};
 
 use crate::point_mass::PointMass;
 use physics_core::vector::Vector2D;
@@ -33,6 +36,39 @@ fn cap_force(force: Vector2D<Force>, config: &SimulationConfig) -> Vector2D<Forc
         }
     }
     force
+}
+
+/// Wrap a displacement into the minimum-image convention interval [-L/2, L/2]
+fn minimum_image_component(d: Length, box_len: Length) -> Length {
+    if box_len == Length::ZERO {
+        return d;
+    }
+    let ratio_value = (d / box_len).get::<ratio>();
+    d - box_len * ratio_value.round()
+}
+
+/// Apply periodic MIC to a displacement vector if boundary is periodic.
+fn periodic_minimum_image_displacement(
+    mut dr: Vector2D<Length>,
+    config: &SimulationConfig,
+) -> Vector2D<Length> {
+    let BoundaryType::Periodic(bounds) = &config.boundary_type else {
+        return dr;
+    };
+
+    // bounds are half-widths; full box length is 2*bounds
+    let lx = bounds.x * Ratio::new::<ratio>(2.0);
+    let ly = bounds.y * Ratio::new::<ratio>(2.0);
+
+    dr.x = minimum_image_component(dr.x, lx);
+    dr.y = minimum_image_component(dr.y, ly);
+    dr
+}
+
+fn outside_cutoff(r_mag: Length, config: &SimulationConfig) -> bool {
+    config
+        .pair_cutoff_radius
+        .is_some_and(|rc: Length| r_mag > rc)
 }
 
 // ----- TRAIT DEFINITION -----
@@ -104,8 +140,14 @@ impl Potential for Gravity {
         point2: &PointMass,
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
-        let r: Vector2D<Length> = point1.pos() - point2.pos();
+        let r: Vector2D<Length> =
+            periodic_minimum_image_displacement(point1.pos() - point2.pos(), config);
         let r_mag = soften_distance(r.mag(), config);
+
+        if outside_cutoff(r_mag, config) {
+            return Vector2D::<Force>::zero();
+        }
+
         let r_hat: Vector2D<Ratio> = r / r_mag;
 
         let force: Vector2D<Force> =
@@ -125,8 +167,14 @@ impl Potential for Gravity {
         mass_arr: &Vec<Mass>,
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
-        let r: Vector2D<Length> = pos_arr[idx1] - pos_arr[idx2];
+        let r: Vector2D<Length> =
+            periodic_minimum_image_displacement(pos_arr[idx1] - pos_arr[idx2], config);
         let r_mag: Length = soften_distance(r.mag(), config);
+
+        if outside_cutoff(r_mag, config) {
+            return Vector2D::<Force>::zero();
+        }
+
         let r_hat: Vector2D<Ratio> = r / r_mag;
 
         let force = -r_hat * self.big_g * mass_arr[idx1] * mass_arr[idx2] / (r_mag * r_mag);
@@ -170,8 +218,13 @@ impl Potential for LennardJones {
         point2: &PointMass,
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
-        let r: Vector2D<Length> = point1.pos() - point2.pos();
+        let r: Vector2D<Length> =
+            periodic_minimum_image_displacement(point1.pos() - point2.pos(), config);
         let r_mag = soften_distance(r.mag(), config);
+
+        if outside_cutoff(r_mag, config) {
+            return Vector2D::<Force>::zero();
+        }
 
         let force: Vector2D<Force> = r * (Ratio::new::<ratio>(48.) * self.epsilon)
             / (self.sigma * self.sigma)
@@ -192,8 +245,13 @@ impl Potential for LennardJones {
         _mass_arr: &Vec<Mass>,
         config: &SimulationConfig,
     ) -> Vector2D<Force> {
-        let r: Vector2D<Length> = pos_arr[idx1] - pos_arr[idx2];
+        let r: Vector2D<Length> =
+            periodic_minimum_image_displacement(pos_arr[idx1] - pos_arr[idx2], config);
         let r_mag: Length = soften_distance(r.mag(), config);
+
+        if outside_cutoff(r_mag, config) {
+            return Vector2D::<Force>::zero();
+        }
 
         let force = r * (Ratio::new::<ratio>(48.) * self.epsilon) / (self.sigma * self.sigma)
             * ((self.sigma / r_mag).powi(P14::new())
