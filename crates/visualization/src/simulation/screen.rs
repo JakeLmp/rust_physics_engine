@@ -1,11 +1,15 @@
-use macroquad::prelude::{Vec2, WHITE, draw_text, screen_height, screen_width};
-use macroquad::text::measure_text;
+use macroquad::{
+    color::Color,
+    prelude::{GRAY, Vec2, WHITE, draw_text, screen_height, screen_width},
+    text::measure_text,
+};
 
 use uom::si::f64::Length;
 
 use crate::simulation::config::SimulationConfig;
 use physics_core::vector::Vector2D;
 
+/// A container struct for screen-related methods
 pub struct Screen;
 
 #[allow(dead_code)]
@@ -21,6 +25,18 @@ pub enum ScreenPosition {
 }
 
 impl Screen {
+    /// Get screen center
+    #[must_use]
+    pub fn center() -> Vec2 {
+        Vec2::new(screen_width() / 2.0, screen_height() / 2.0)
+    }
+
+    /// Get screen dimensions
+    #[must_use]
+    pub fn dimensions() -> Vec2 {
+        Vec2::new(screen_width(), screen_height())
+    }
+
     /// Convert world coordinates to screen coordinates using given config
     #[must_use]
     #[allow(clippy::cast_possible_truncation)]
@@ -106,15 +122,55 @@ impl Screen {
         }
     }
 
-    /// Get screen center
-    #[must_use]
-    pub fn center() -> Vec2 {
-        Vec2::new(screen_width() / 2.0, screen_height() / 2.0)
+    /// Draw the boundary, depending on configuration
+    pub fn draw_boundary(config: &SimulationConfig) {
+        if !config.display_boundary {
+            return;
+        }
+
+        let bounds = match config.boundary_type.bounds() {
+            Some(b) => b,
+            None => return, // No boundary to draw for Infinite type
+        };
+
+        // Convert boundary corners to screen coordinates
+        let top_left = Self::world_to_screen(
+            &Vector2D {
+                x: config.length_unit.new(-config.length_unit.get(bounds.x)),
+                y: config.length_unit.new(config.length_unit.get(bounds.y)),
+            },
+            config,
+        );
+        let top_right = Self::world_to_screen(
+            &Vector2D {
+                x: config.length_unit.new(config.length_unit.get(bounds.x)),
+                y: config.length_unit.new(config.length_unit.get(bounds.y)),
+            },
+            config,
+        );
+        let bottom_left = Self::world_to_screen(
+            &Vector2D {
+                x: config.length_unit.new(-config.length_unit.get(bounds.x)),
+                y: config.length_unit.new(-config.length_unit.get(bounds.y)),
+            },
+            config,
+        );
+        let bottom_right = Self::world_to_screen(
+            &Vector2D {
+                x: config.length_unit.new(config.length_unit.get(bounds.x)),
+                y: config.length_unit.new(-config.length_unit.get(bounds.y)),
+            },
+            config,
+        );
+
+        Self::draw_line(top_left, top_right, 1.0, GRAY);
+        Self::draw_line(top_right, bottom_right, 1.0, GRAY);
+        Self::draw_line(bottom_right, bottom_left, 1.0, GRAY);
+        Self::draw_line(bottom_left, top_left, 1.0, GRAY);
     }
 
-    /// Get screen dimensions
-    #[must_use]
-    pub fn dimensions() -> Vec2 {
-        Vec2::new(screen_width(), screen_height())
+    /// Helper function to draw a line between two points
+    fn draw_line(start: Vec2, end: Vec2, thickness: f32, color: Color) {
+        macroquad::shapes::draw_line(start.x, start.y, end.x, end.y, thickness, color);
     }
 }
