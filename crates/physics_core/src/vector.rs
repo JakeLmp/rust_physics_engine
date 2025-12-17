@@ -17,7 +17,7 @@ impl<Q> Vector2D<Q>
 where
     Q: Copy + uom::num_traits::Zero,
 {
-    /// Initialise a zero-vector
+    /// Initialise a zero-vector.
     #[must_use]
     pub fn zero() -> Self {
         Self {
@@ -62,6 +62,51 @@ where
     }
 }
 
+/// Implements vector addition for `Vector2D` with reference on the right-hand side.
+impl<Q> Add<&Vector2D<Q>> for Vector2D<Q>
+where
+    Q: Add<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn add(self, other: &Vector2D<Q>) -> Vector2D<Q> {
+        Vector2D {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+/// Implements vector addition for `Vector2D` with reference on the left-hand side.
+impl<Q> Add<Vector2D<Q>> for &Vector2D<Q>
+where
+    Q: Add<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn add(self, other: Vector2D<Q>) -> Vector2D<Q> {
+        Vector2D {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+/// Implements vector addition for `Vector2D` with references on both sides.
+impl<Q> Add<&Vector2D<Q>> for &Vector2D<Q>
+where
+    Q: Add<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn add(self, other: &Vector2D<Q>) -> Vector2D<Q> {
+        Vector2D {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
 /// Implements in-place vector addition for `Vector2D`.
 impl<Q> AddAssign for Vector2D<Q>
 where
@@ -88,6 +133,51 @@ where
     }
 }
 
+/// Implements vector subtraction for `Vector2D` with reference on the right-hand side.
+impl<Q> Sub<&Vector2D<Q>> for Vector2D<Q>
+where
+    Q: Sub<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn sub(self, other: &Vector2D<Q>) -> Vector2D<Q> {
+        Vector2D {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
+/// Implements vector subtraction for `Vector2D` with reference on the left-hand side.
+impl<Q> Sub<Vector2D<Q>> for &Vector2D<Q>
+where
+    Q: Sub<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn sub(self, other: Vector2D<Q>) -> Vector2D<Q> {
+        Vector2D {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
+/// Implements vector subtraction for `Vector2D` with references on both sides.
+impl<Q> Sub<&Vector2D<Q>> for &Vector2D<Q>
+where
+    Q: Sub<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn sub(self, other: &Vector2D<Q>) -> Vector2D<Q> {
+        Vector2D {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
 /// Implements in-place vector subtraction for `Vector2D`.
 impl<Q> SubAssign for Vector2D<Q>
 where
@@ -99,8 +189,8 @@ where
     }
 }
 
-/// Implements unary negation operator for `Vector2D`
-/// This allows reversing the vector's direction
+/// Implements unary negation operator for `Vector2D`.
+/// This allows reversing the vector's direction.
 impl<Q> Neg for Vector2D<Q>
 where
     Q: Neg<Output = Q> + Copy,
@@ -115,7 +205,23 @@ where
     }
 }
 
-/// Implements generic scalar multiplication with `uom::Quantity` for `Vector2D`
+/// Implements unary negation operator for `&Vector2D`.
+/// This allows reversing the vector's direction when the vector is a reference.
+impl<Q> Neg for &Vector2D<Q>
+where
+    Q: Neg<Output = Q> + Copy,
+{
+    type Output = Vector2D<Q>;
+
+    fn neg(self) -> Vector2D<Q> {
+        Vector2D {
+            x: -self.x,
+            y: -self.y,
+        }
+    }
+}
+
+/// Implements generic scalar multiplication with `uom::si::Quantity` for `Vector2D`.
 impl<Q, S, Out> Mul<S> for Vector2D<Q>
 where
     Q: Mul<S, Output = Out> + Copy,
@@ -131,7 +237,23 @@ where
     }
 }
 
-/// Implements division by generic type for `Vector2D<Q>`
+/// Implements generic scalar multiplication with `uom::si::Quantity` for `&Vector2D`.
+impl<Q, S, Out> Mul<S> for &Vector2D<Q>
+where
+    Q: Mul<S, Output = Out> + Copy,
+    S: Copy,
+{
+    type Output = Vector2D<Out>;
+
+    fn mul(self, rhs: S) -> Vector2D<Out> {
+        Vector2D {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+/// Implements division by generic scalar type for `Vector2D<Q>`.
 impl<Q, S, Out> Div<S> for Vector2D<Q>
 where
     Q: Div<S, Output = Out> + Copy,
@@ -147,8 +269,49 @@ where
     }
 }
 
-/// Due to Rust orphan rule, we cannot implement multiplicatin with `Vector2D` for generic quantity.
+/// Implements division by generic scalar type for `&Vector2D<Q>`.
+impl<Q, S, Out> Div<S> for &Vector2D<Q>
+where
+    Q: Div<S, Output = Out> + Copy,
+    S: Copy,
+{
+    type Output = Vector2D<Out>;
+
+    fn div(self, rhs: S) -> Vector2D<Out> {
+        Vector2D {
+            x: self.x / rhs,
+            y: self.y / rhs,
+        }
+    }
+}
+
+/// Implements multiplication with `Vector2D<Q>` for `uom::si::Quantity` (and maybe other types also).
+/// This enables doing `uom::si::Quantity * Vector2D<uom::si::Quantity>`.
+/// Operations with references are also allowed for all combinations: `&Q * &V`, `Q * &V` and `&Q * V`.
+///
+/// Due to Rust orphan rule, we cannot implement multiplication with `Vector2D` for generic quantity,
+/// so we have to do this for each specific `Vector2D<Q>` separately.
 /// To sort-of make this scalable, we use a macro to implement multiplication for specific types.
+///
+/// Example:
+/// ```
+/// uom::si::f64::{Length, Ratio};
+///
+/// let L = Length::new::<meter>(10.);
+/// let V = Vector2D {
+///     x: Ratio::new::<ratio>(3.),
+///     y: Ratio::new::<ratio>(4.),
+/// }
+///
+/// // This will panic
+/// let result = L * V;
+///
+/// // Implement multiplication of any Quantity with Vector2D<Ratio>
+/// impl_vector_mul!(Ratio);
+///
+/// // Now it won't
+/// let result = L * V;
+/// ```
 macro_rules! impl_vector_mul {
     ($quantity:ty) => {
         impl<Q, Out> Mul<Vector2D<Q>> for $quantity
@@ -161,6 +324,48 @@ macro_rules! impl_vector_mul {
                 Vector2D {
                     x: rhs.x * self,
                     y: rhs.y * self,
+                }
+            }
+        }
+
+        impl<Q, Out> Mul<&Vector2D<Q>> for $quantity
+        where
+            Q: Mul<$quantity, Output = Out> + Copy,
+        {
+            type Output = Vector2D<Out>;
+
+            fn mul(self, rhs: &Vector2D<Q>) -> Vector2D<Out> {
+                Vector2D {
+                    x: rhs.x * self,
+                    y: rhs.y * self,
+                }
+            }
+        }
+
+        impl<Q, Out> Mul<Vector2D<Q>> for &$quantity
+        where
+            Q: Mul<$quantity, Output = Out> + Copy,
+        {
+            type Output = Vector2D<Out>;
+
+            fn mul(self, rhs: Vector2D<Q>) -> Vector2D<Out> {
+                Vector2D {
+                    x: rhs.x * *self,
+                    y: rhs.y * *self,
+                }
+            }
+        }
+
+        impl<Q, Out> Mul<&Vector2D<Q>> for &$quantity
+        where
+            Q: Mul<$quantity, Output = Out> + Copy,
+        {
+            type Output = Vector2D<Out>;
+
+            fn mul(self, rhs: &Vector2D<Q>) -> Vector2D<Out> {
+                Vector2D {
+                    x: rhs.x * *self,
+                    y: rhs.y * *self,
                 }
             }
         }
