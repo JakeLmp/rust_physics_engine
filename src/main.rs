@@ -30,7 +30,7 @@ async fn main() {
         .length_unit(LengthUnit::Angstrom)
         .mass_unit(MassUnit::Dalton)
         .pixels_per_length(5.)
-        .time_steps_per_frame(Some(100))
+        .time_steps_per_frame(100)
         .boundary_type(BoundaryKind::Elastic(Vector2D {
             x: Length::new::<angstrom>(max_bound),
             y: Length::new::<angstrom>(max_bound),
@@ -85,7 +85,7 @@ async fn main() {
             StepType::VelocityVerlet,
         );
 
-        elapsed_time += config.time_step * config.time_steps_per_frame.unwrap_or(1) as f64;
+        elapsed_time += config.time_step * config.time_steps_per_frame as f64;
 
         clear_background(BLACK);
 

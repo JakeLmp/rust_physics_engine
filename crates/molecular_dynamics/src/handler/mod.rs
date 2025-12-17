@@ -1,9 +1,10 @@
+use itertools::Itertools;
 use physics_core::vector::Vector2D;
 use uom::si::{
     f64::{Acceleration, Length, Mass, Ratio, Time, Velocity},
     ratio::ratio,
 };
-use visualization::simulation::config::{BoundaryKind, SimulationConfig};
+use visualization::simulation::config::{BoundaryKind, ParallelComputationKind, SimulationConfig};
 
 use crate::{
     physics::{potential::Potential, time_integration::StepType},
@@ -64,25 +65,28 @@ impl SimulationHandler {
         time_step: Time,
         movement_step_type: StepType,
     ) {
-        for _ in 0..config.time_steps_per_frame.unwrap_or(1) {
+        for _ in 0..config.time_steps_per_frame {
             // Calculate forces and accelerations at current positions
-            for acc in &mut self.accelerations {
-                *acc = Vector2D::<Acceleration>::zero();
-            }
+            self.accelerations.fill(Vector2D::<Acceleration>::zero());
 
-            for i in 0..self.accelerations.len() {
-                for j in (i + 1)..self.accelerations.len() {
-                    let force = potential.force_from_arrays(
-                        i,
-                        j,
-                        &self.positions,
-                        &self.velocities,
-                        &self.accelerations,
-                        &self.masses,
-                        config,
-                    );
-                    self.accelerations[i] += force / self.masses[i];
-                    self.accelerations[j] -= force / self.masses[j];
+            match config.parallel_computation_kind {
+                ParallelComputationKind::SingleThread => {
+                    for (i, j) in (0..self.accelerations.len()).tuple_combinations() {
+                        let force = potential.force_from_arrays(
+                            i,
+                            j,
+                            &self.positions,
+                            &self.velocities,
+                            &self.accelerations,
+                            &self.masses,
+                            config,
+                        );
+                        self.accelerations[i] += force / self.masses[i];
+                        self.accelerations[j] -= force / self.masses[j];
+                    }
+                }
+                ParallelComputationKind::CPUMultiThread => {
+                    todo!();
                 }
             }
 

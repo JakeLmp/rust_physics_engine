@@ -25,8 +25,8 @@ pub struct SimulationConfig {
 
     // ===== World-to-screen setup =====
     /// The number of time steps to take each frame before rendering
-    #[builder(default = None)]
-    pub time_steps_per_frame: Option<u8>,
+    #[builder(default = 1)]
+    pub time_steps_per_frame: u8,
 
     /// Number of pixels per unit length
     #[builder(default = 1.0)]
@@ -66,6 +66,11 @@ pub struct SimulationConfig {
     /// Type of parallelism to use, if available.
     #[builder(default = ParallelComputationKind::SingleThread)]
     pub parallel_computation_kind: ParallelComputationKind,
+
+    /// Number of parallel threads.
+    /// Only used when `parallel_computation_kind == ParallelComputationKind::CPUMultiThread`
+    #[builder(default = 1)]
+    pub n_threads: u8,
 }
 
 impl SimulationConfig {
